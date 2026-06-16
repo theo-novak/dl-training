@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(& \"c:\\\\Users\\\\theon\\\\Projects\\\\training-project\\\\.venv\\\\Scripts\\\\python.exe\" -c \"import training_project, yfinance as yf; print\\('training_project', training_project.__version__\\); print\\('yfinance', yf.__version__\\)\")",
+      "PowerShell(& \"c:\\\\Users\\\\theon\\\\Projects\\\\training-project\\\\.venv\\\\Scripts\\\\python.exe\" -c \"import yfinance as yf; df = yf.download\\('AAPL', start='2023-01-01', end='2023-02-01', auto_adjust=True, progress=False\\); print\\(df.shape\\); print\\(df.head\\(3\\)\\)\")"
+    ]
+  }
+}
