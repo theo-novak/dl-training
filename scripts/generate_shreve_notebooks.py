@@ -1646,3 +1646,11 @@ def save_all():
 if __name__ == "__main__":
     save_all()
     print(f"Done — {len(NOTEBOOKS)} notebooks in {OUT}")
+    # Normalize LaTeX delimiters for KaTeX ($...$ / $$...$$)
+    import importlib.util
+
+    fix_path = Path(__file__).parent / "fix_notebook_latex_for_katex.py"
+    spec = importlib.util.spec_from_file_location("fix_latex", fix_path)
+    fix_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fix_mod)
+    fix_mod.main()
