@@ -1,6 +1,20 @@
 """Generate Shreve Vol II week notebooks matching graduate_probability.ipynb style."""
 import json
+import importlib.util
+import sys
 from pathlib import Path
+
+_SCRIPTS = Path(__file__).resolve().parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+
+from baxter_rennie_enrichment import (
+    BAXTER_RENNIE_URL,
+    ENRICHMENT,
+    br_cells_for_week,
+    further_reading_br,
+    merge_parts_table,
+)
 
 OUT = Path(__file__).resolve().parent.parent / "notebooks" / "shreve"
 SHREVE_URL = (
@@ -32,7 +46,8 @@ HOW_TO_USE = """## How to use this notebook
 1. **Read** each markdown cell, then **run** the code beneath it (`Shift+Enter`).
 2. **Change parameters** and re-run — stochastic calculus is about *relationships*, not memorized formulas.
 3. Sections end with **"Your turn"** exercises. The **problem set** at the end has **click-to-reveal solutions**.
-4. Primary reference: **Shreve**, *Stochastic Calculus for Finance II* — see chapter pointers in each section."""
+4. **Shreve** (*Stochastic Calculus for Finance II*) — rigorous measure-theoretic treatment; see chapter pointers in each section.
+5. **Baxter & Rennie** (*Financial Calculus*) — market intuition, replication, and worked examples; see spotlight sections."""
 
 
 def _source(text: str) -> list:
@@ -60,7 +75,7 @@ def intro(title: str, week: int, topic: str, chapters: str, parts_table: str) ->
 
 **Week {week}** — {topic}
 
-This notebook teaches **{topic.lower()}** in the style of our graduate probability notebook: precise definitions from Shreve, then **verified with Python**.
+This notebook teaches **{topic.lower()}** in the style of our graduate probability notebook: definitions from **Shreve**, intuition and examples from **Baxter & Rennie**, then **verified with Python**.
 
 ## What you will learn
 
@@ -68,7 +83,9 @@ This notebook teaches **{topic.lower()}** in the style of our graduate probabili
 
 {HOW_TO_USE}
 
-**Shreve reference:** {chapters} — [Vol II PDF]({SHREVE_URL})
+**References:**
+- **Shreve** Vol II — {chapters} — [PDF]({SHREVE_URL})
+- **Baxter & Rennie**, *Financial Calculus* — [PDF]({BAXTER_RENNIE_URL})
 
 Let's begin."""
     return md(text)
@@ -83,18 +100,6 @@ def problem_section(problems: list[str], solutions: str) -> list[dict]:
         ),
     ]
     return cells
-
-
-def further_reading(chapter: str, extra: str = "") -> dict:
-    text = f"""---
-## Further reading
-
-- **Shreve**, *Stochastic Calculus for Finance II*, Ch. {chapter} — primary text for this week.
-- **Shreve**, *Stochastic Calculus for Finance I* — discrete-time foundations (Ch. 1–5).
-- **Karatzas & Shreve**, *Brownian Motion and Stochastic Calculus* — rigorous continuous-time theory.
-{extra}
-Whenever a theorem says a process "converges" or a formula "holds in expectation," you can **simulate it** here and see the numbers match."""
-    return md(text)
 
 
 NOTEBOOKS = {}
@@ -1605,16 +1610,21 @@ print(f"Pipeline MC call = {price:.4f}")"""),
 }
 
 
-def build_notebook(spec: dict) -> dict:
+def build_notebook(spec: dict, filename: str) -> dict:
     week, topic, chapters = spec["meta"]
+    br_data = ENRICHMENT.get(filename, {})
+    parts_table = spec["parts_table"]
+    if br_data.get("br_rows"):
+        parts_table = merge_parts_table(parts_table, br_data["br_rows"])
     cells = [
-        intro(f"Shreve Week {week:02d} — {topic}", week, topic, chapters, spec["parts_table"]),
+        intro(f"Shreve Week {week:02d} — {topic}", week, topic, chapters, parts_table),
         md(SETUP_MD),
         code(SETUP_CODE),
     ]
     cells.extend(spec["cells"])
+    cells.extend(br_cells_for_week(filename, md, code))
     cells.extend(problem_section(spec["problems"], spec["solutions"]))
-    cells.append(further_reading(spec["reading_ch"]))
+    cells.append(md(further_reading_br(spec["reading_ch"], SHREVE_URL, filename)))
     return {
         "cells": cells,
         "metadata": {
@@ -1639,7 +1649,7 @@ def save_all():
     for name, spec in NOTEBOOKS.items():
         path = OUT / name
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(build_notebook(spec), f, indent=2, ensure_ascii=False)
+            json.dump(build_notebook(spec, name), f, indent=2, ensure_ascii=False)
         print(f"  wrote {path.name}")
 
 
