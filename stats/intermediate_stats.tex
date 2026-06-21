@@ -1,0 +1,1026 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{amsthm}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    pdftitle={Intermediate Probability and Statistics},
+    pdfauthor={Your Name}
+}
+
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{remark}{Remark}[section]
+
+\title{Intermediate Probability and Statistics\\[0.5em]
+       \large A Calculus-Based Course with Theory, Examples, and Intuition}
+\author{Theodosios Dimitrasopoulos\footnote{Email: theodosios.novak@gmail.com}}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{How to Use This Course}
+
+This document assumes you are comfortable with the basics of probability and statistics: random variables, common distributions (Binomial, Normal, Exponential), expectation, variance, the law of large numbers, simple confidence intervals, hypothesis tests, and simple linear regression.%
+\footnote{The level is comparable to the transition from introductory probability to a first mathematical statistics course or an ``intermediate statistics'' module.[web:30][web:36][web:41]}
+
+The goal is to deepen your understanding of \emph{why} standard statistical procedures work by exposing the underlying probabilistic and asymptotic theory, while keeping the exposition example-driven and intuition-focused. 
+You will see more formal definitions and theorems, but we will always accompany them with concrete calculations, visual pictures in words, and connections to practical contexts (e.g., finance, simulation, regression modeling).
+
+\medskip
+A reasonable path through the material is:
+\begin{enumerate}
+    \item Sections \ref{sec:prob-found}--\ref{sec:clt-delta}: probability foundations and asymptotics.
+    \item Sections \ref{sec:sampling-dists}--\ref{sec:tests}: sampling distributions, estimation, and hypothesis tests.
+    \item Sections \ref{sec:bayes}--\ref{sec:bootstrap}: Bayesian methods, linear models, and resampling.
+\end{enumerate}
+You can also treat individual sections as self-contained mini-lectures.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Probability Foundations at a Deeper Level}
+\label{sec:prob-found}
+
+\subsection{Sigma-Algebras and Probability Measures}
+
+We briefly revisit the measure-theoretic foundation of probability, but focus on intuition and practical usage rather than full rigor.
+
+\begin{definition}[Sigma-algebra]
+Let $\Omega$ be a non-empty set (the sample space). 
+A collection $\mathcal{F}$ of subsets of $\Omega$ is called a \textbf{sigma-algebra} if:
+\begin{enumerate}
+    \item $\Omega \in \mathcal{F}$.
+    \item If $A \in \mathcal{F}$, then $A^c \in \mathcal{F}$.
+    \item If $A_1, A_2, \dots \in \mathcal{F}$, then $\displaystyle \bigcup_{n=1}^\infty A_n \in \mathcal{F}$.
+\end{enumerate}
+\end{definition}
+
+Intuitively, $\mathcal{F}$ is the collection of all events we are able (or willing) to assign probabilities to. 
+For finite or countable $\Omega$, we often take $\mathcal{F}$ to be the collection of all subsets of $\Omega$, but for continuous spaces we usually restrict to a suitable sigma-algebra like the Borel sets of $\mathbb{R}$.
+
+\begin{definition}[Probability measure]
+A function $P : \mathcal{F} \to [0,1]$ is a \textbf{probability measure} if:
+\begin{enumerate}
+    \item $P(\Omega) = 1$.
+    \item For disjoint events $A_1, A_2, \dots \in \mathcal{F}$,
+    \[
+    P\Big(\bigcup_{n=1}^\infty A_n\Big) = \sum_{n=1}^\infty P(A_n).
+    \]
+\end{enumerate}
+\end{definition}
+
+This measure-theoretic view unifies discrete and continuous probabilities: point masses and density integrals are both special cases of assigning ``sizes'' to sets in a consistent way.
+
+\subsection{Distribution Functions}
+
+For a real-valued random variable $X$, the \textbf{cumulative distribution function} (CDF) is
+\[
+F_X(x) = P(X \le x),\quad x \in \mathbb{R}.
+\]
+
+Key properties:
+\begin{itemize}
+    \item $F_X$ is non-decreasing.
+    \item $\lim_{x\to -\infty} F_X(x) = 0$, $\ \lim_{x\to +\infty} F_X(x) = 1$.
+    \item $F_X$ is right-continuous.
+\end{itemize}
+
+For discrete $X$, $F_X$ is a step function; for continuous $X$ with pdf $f_X$, we have
+\[
+F_X(x) = \int_{-\infty}^x f_X(t)\,dt.
+\]
+
+\begin{example}[Mixture distribution]
+Suppose a strategy's daily return $R$ is
+\[
+R =
+\begin{cases}
+0 & \text{with probability } 0.9,\\
+Z & \text{with probability } 0.1,
+\end{cases}
+\]
+where $Z \sim N(0.02, 0.01^2)$ (2\% mean, 1\% sd). 
+Then $R$ is neither purely discrete nor purely continuous. 
+Its CDF is a mixture:
+\[
+F_R(x) = 0.9 \mathbf{1}_{\{x \ge 0\}} + 0.1\, F_Z(x),
+\]
+where $F_Z$ is the normal CDF of $Z$. 
+This example illustrates that CDFs are the most general description of a distribution.
+
+\end{example}
+
+\subsection{Transformations of Random Variables}
+
+Let $X$ be a continuous random variable with pdf $f_X$ and $Y = g(X)$ where $g$ is a differentiable monotone function. 
+Then the pdf of $Y$ is
+\[
+f_Y(y) = f_X\big(g^{-1}(y)\big)\,\left|\frac{d}{dy}g^{-1}(y)\right|.
+\]
+
+\begin{example}[Log-transform of a positive variable]
+Suppose a positive random variable $X$ has pdf
+\[
+f_X(x) = \lambda e^{-\lambda x}, \quad x \ge 0
+\]
+(Exponential$(\lambda)$). 
+Consider $Y = \log X$. 
+Then $X = e^Y$, so $g^{-1}(y) = e^y$ and $\frac{d}{dy}g^{-1}(y) = e^y$. 
+Thus
+\[
+f_Y(y) = f_X(e^y)\, e^y 
+= \lambda e^{-\lambda e^y} e^y,\quad y \in \mathbb{R}.
+\]
+So a log-transform turns an exponential into a distribution with a heavy right tail in $y$-space; this kind of transformation is useful in log-return modeling and variance-stabilizing transforms.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Modes of Convergence}
+\label{sec:convergence}
+
+To understand asymptotic results like the law of large numbers and the central limit theorem, we need precise notions of convergence for sequences of random variables.
+
+\subsection{Convergence in Probability}
+
+\begin{definition}[Convergence in probability]
+A sequence $X_n$ converges to $X$ in probability, written $X_n \xrightarrow{P} X$, if for every $\varepsilon > 0$,
+\[
+\lim_{n\to\infty} P(|X_n - X| > \varepsilon) = 0.
+\]
+\end{definition}
+
+Intuitively, for large $n$, $X_n$ is very likely to be close to $X$. 
+The law of large numbers is an example: the sample mean $\bar{X}_n$ converges in probability to the true mean $\mu$.
+
+\begin{example}[Sample mean of i.i.d. variables]
+Let $X_1, X_2, \dots$ be i.i.d. with $E[X_i] = \mu$ and $\operatorname{Var}(X_i) = \sigma^2 < \infty$. 
+Define $\bar{X}_n = \frac{1}{n}\sum_{i=1}^n X_i$. 
+By Chebyshev's inequality,
+\[
+P(|\bar{X}_n - \mu| > \varepsilon)
+\le \frac{\operatorname{Var}(\bar{X}_n)}{\varepsilon^2}
+= \frac{\sigma^2/n}{\varepsilon^2} = \frac{\sigma^2}{n\varepsilon^2}.
+\]
+As $n \to \infty$, the right-hand side goes to 0, so $\bar{X}_n \xrightarrow{P} \mu$. 
+This is a direct, quantitative illustration of convergence in probability.
+
+\end{example}
+
+\subsection{Almost Sure Convergence}
+
+\begin{definition}[Almost sure convergence]
+We say $X_n$ converges to $X$ almost surely (a.s.), written $X_n \xrightarrow{\text{a.s.}} X$, if
+\[
+P\big(\{\omega : X_n(\omega) \to X(\omega) \text{ as } n\to\infty\}\big) = 1.
+\]
+\end{definition}
+
+This is a stronger notion: for almost every outcome, the sequence of numbers $X_n(\omega)$ converges in the usual deterministic sense.
+
+\begin{remark}
+Almost sure convergence implies convergence in probability, but not conversely. 
+Roughly, a.s. convergence is pointwise (except on a null set), while convergence in probability is about the probabilities of deviations shrinking.
+\end{remark}
+
+\subsection{Convergence in Distribution}
+
+\begin{definition}[Convergence in distribution]
+$X_n$ converges in distribution to $X$, written $X_n \Rightarrow X$, if
+\[
+\lim_{n\to\infty} F_{X_n}(x) = F_X(x)
+\]
+for all $x$ where $F_X$ is continuous.
+\end{definition}
+
+This mode of convergence is purely about the distributions, not about any underlying probability space. 
+The central limit theorem is a convergence-in-distribution statement.
+
+\begin{example}[Sample mean CLT preview]
+Let $X_1,\dots,X_n$ be i.i.d. with mean $\mu$ and variance $\sigma^2$. 
+Define
+\[
+Z_n = \frac{\bar{X}_n - \mu}{\sigma/\sqrt{n}}.
+\]
+The central limit theorem says $Z_n \Rightarrow Z$ where $Z \sim N(0,1)$. 
+This does not mean $Z_n$ eventually equals a normal random variable, but that its distribution becomes closer and closer to the standard normal distribution.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Law of Large Numbers Revisited}
+
+\subsection{Weak Law of Large Numbers (WLLN)}
+
+\begin{theorem}[Weak Law of Large Numbers]
+Let $X_1, X_2, \dots$ be i.i.d. with $E[X_i] = \mu$ and $\operatorname{Var}(X_i) = \sigma^2 < \infty$. 
+Then
+\[
+\bar{X}_n \xrightarrow{P} \mu.
+\]
+\end{theorem}
+
+The proof via Chebyshev's inequality was already sketched. 
+The key point is that as $n$ increases, the sample mean's variance shrinks like $1/n$, so it's increasingly concentrated near $\mu$.
+
+\subsection{Strong Law of Large Numbers (SLLN)}
+
+\begin{theorem}[Strong Law of Large Numbers (informal)]
+Under mild conditions (for example, i.i.d. with finite expectation $E[|X_i|] < \infty$), we have
+\[
+\bar{X}_n \xrightarrow{\text{a.s.}} \mu.
+\]
+\end{theorem}
+
+This is stronger than the WLLN: for almost every realization, the time average converges to the expected value. 
+Intuitively, if you keep rolling a fair die forever, the long-run average outcome \emph{for a single sequence of rolls} will be 3.5.
+
+\begin{example}[Simulated trading P\&L]
+Suppose you simulate a trading strategy's daily profit and loss (P\&L) $X_1, X_2, \dots$ as i.i.d. with $E[X_i]=\mu$. 
+The strong law says that if you look at a single long simulation path, the average P\&L
+\[
+\bar{X}_n = \frac{1}{n}\sum_{i=1}^n X_i
+\]
+will almost surely approach $\mu$. 
+This justifies thinking of the expected daily P\&L as the long-run average performance in a stable market regime.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Central Limit Theorem and Delta Method}
+\label{sec:clt-delta}
+
+\subsection{Classical Central Limit Theorem}
+
+\begin{theorem}[Central Limit Theorem (Lindeberg–Levy version)]
+Let $X_1,\dots,X_n$ be i.i.d. with $E[X_i]=\mu$ and $\operatorname{Var}(X_i)=\sigma^2 < \infty$. 
+Define
+\[
+Z_n = \frac{\bar{X}_n - \mu}{\sigma/\sqrt{n}}.
+\]
+Then
+\[
+Z_n \Rightarrow N(0,1).
+\]
+\end{theorem}
+
+In practice, this means that for large $n$, the distribution of $\bar{X}_n$ is approximately normal with mean $\mu$ and variance $\sigma^2/n$. 
+This underlies normal approximations for sample means, standard error formulas, and many test statistics.
+
+\begin{example}[Average daily return]
+Let $R_1,\dots,R_n$ be i.i.d. daily returns with mean $\mu$ and variance $\sigma^2$. 
+Then for large $n$,
+\[
+\bar{R}_n \approx N\left(\mu,\frac{\sigma^2}{n}\right).
+\]
+If you estimate $\mu$ by $\bar{R}_n$, you can attach an approximate 95\% confidence interval:
+\[
+\bar{R}_n \pm 1.96\,\frac{\sigma}{\sqrt{n}}.
+\]
+In practice $\sigma$ is unknown and replaced by the sample standard deviation, leading to a t-approximation.
+
+\end{example}
+
+\subsection{Delta Method}
+
+The delta method extends the CLT to smooth functions of asymptotically normal estimators.
+
+\begin{theorem}[Delta Method (first-order)]
+Suppose $\sqrt{n}(T_n - \theta) \Rightarrow N(0,\tau^2)$, and $g$ is differentiable at $\theta$ with derivative $g'(\theta) \ne 0$. 
+Then
+\[
+\sqrt{n}\big(g(T_n) - g(\theta)\big) \Rightarrow N\big(0,\,(g'(\theta))^2 \tau^2\big).
+\]
+\end{theorem}
+
+Heuristically, for $T_n$ close to $\theta$, we approximate
+\[
+g(T_n) \approx g(\theta) + g'(\theta)(T_n - \theta).
+\]
+So the variance of $g(T_n)$ is approximately $(g'(\theta))^2$ times the variance of $T_n$.
+
+\begin{example}[Variance-stabilizing transform for Poisson mean]
+Let $X_1,\dots,X_n$ be i.i.d. Poisson$(\lambda)$ with $\lambda>0$. 
+The sample mean $\bar{X}_n$ satisfies
+\[
+\sqrt{n}(\bar{X}_n - \lambda) \Rightarrow N(0,\lambda),
+\]
+so $\tau^2 = \lambda$. 
+Define $T_n = \bar{X}_n$ and consider $g(\theta) = 2\sqrt{\theta}$, so $g'(\theta) = 1/\sqrt{\theta}$. 
+Then
+\[
+\sqrt{n}\big(2\sqrt{T_n} - 2\sqrt{\lambda}\big)
+\Rightarrow N\left(0, \left(\frac{1}{\sqrt{\lambda}}\right)^2 \lambda\right)
+= N(0,1).
+\]
+So $2\sqrt{\bar{X}_n}$ is approximately normal with mean $2\sqrt{\lambda}$ and variance $1/n$. 
+This suggests that $\sqrt{X}$-type transforms can stabilize variance in Poisson-like count data.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Moment Generating and Characteristic Functions}
+
+\subsection{Moment Generating Functions}
+
+\begin{definition}[Moment generating function]
+The \textbf{moment generating function} (mgf) of a random variable $X$ is
+\[
+M_X(t) = E[e^{tX}],
+\]
+for all $t$ where this expectation is finite.
+\end{definition}
+
+If $M_X$ exists in an open interval around 0, it uniquely determines the distribution of $X$. 
+Moments are obtained by differentiation:
+\[
+M_X^{(k)}(0) = E[X^k].
+\]
+
+\begin{example}[Normal mgf]
+If $X \sim N(\mu,\sigma^2)$, then
+\[
+M_X(t) = \exp\left(\mu t + \frac{1}{2}\sigma^2 t^2\right).
+\]
+We see directly that $M_X'(0) = \mu$ and $M_X''(0) = \mu^2 + \sigma^2$, so $\operatorname{Var}(X) = M_X''(0) - (M_X'(0))^2 = \sigma^2$ as expected.
+
+\end{example}
+
+\subsection{Characteristic Functions}
+
+The \textbf{characteristic function} of $X$ is
+\[
+\varphi_X(t) = E[e^{itX}],\quad t \in \mathbb{R}.
+\]
+Characteristic functions always exist (they are bounded by 1) and also uniquely determine the distribution of $X$.
+
+One advantage of characteristic functions is that they linearize sums: if $X$ and $Y$ are independent, then
+\[
+\varphi_{X+Y}(t) = \varphi_X(t)\,\varphi_Y(t).
+\]
+
+\begin{example}[Sum of independent normals]
+Let $X \sim N(\mu_1,\sigma_1^2)$ and $Y \sim N(\mu_2,\sigma_2^2)$ be independent. 
+Then
+\[
+\varphi_X(t) = \exp\left(i\mu_1 t - \frac{1}{2}\sigma_1^2 t^2\right),\quad
+\varphi_Y(t) = \exp\left(i\mu_2 t - \frac{1}{2}\sigma_2^2 t^2\right).
+\]
+Thus
+\[
+\varphi_{X+Y}(t) = \varphi_X(t)\varphi_Y(t)
+= \exp\left(i(\mu_1+\mu_2)t - \frac{1}{2}(\sigma_1^2+\sigma_2^2)t^2\right),
+\]
+which is the characteristic function of $N(\mu_1+\mu_2,\ \sigma_1^2+\sigma_2^2)$. 
+So the sum of independent normals is normal, with mean and variance added.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Multivariate Distributions and the Multivariate Normal}
+
+\subsection{Joint, Marginal, and Conditional Distributions}
+
+For a random vector $\bm{X} = (X_1,\dots,X_d)^\top$, the joint distribution can be described via a joint pdf $f_{\bm{X}}(\bm{x})$ (continuous case) or joint pmf $p_{\bm{X}}(\bm{x})$ (discrete). 
+
+The \textbf{marginal} distribution of $X_1$ is obtained by integrating/summing over the other coordinates:
+\[
+f_{X_1}(x_1)
+= \int_{\mathbb{R}^{d-1}} f_{\bm{X}}(x_1,x_2,\dots,x_d)\,dx_2\cdots dx_d.
+\]
+
+The \textbf{conditional} distribution of $X_1$ given $X_2=x_2,\dots,X_d=x_d$ has density
+\[
+f_{X_1 \mid X_2,\dots,X_d}(x_1 \mid x_2,\dots,x_d)
+= \frac{f_{\bm{X}}(x_1,\dots,x_d)}{f_{X_2,\dots,X_d}(x_2,\dots,x_d)},
+\]
+whenever the denominator is positive.
+
+\subsection{Covariance Matrix}
+
+For $\bm{X} = (X_1,\dots,X_d)^\top$ with mean vector $\bm{\mu} = E[\bm{X}]$, the \textbf{covariance matrix} is
+\[
+\Sigma = \operatorname{Cov}(\bm{X})
+= E\big[(\bm{X}-\bm{\mu})(\bm{X}-\bm{\mu})^\top\big].
+\]
+The $(i,j)$ entry is $\operatorname{Cov}(X_i,X_j)$. 
+This matrix is symmetric and positive semi-definite.
+
+\begin{example}[Portfolio variance]
+Let $\bm{R}=(R_1,\dots,R_d)^\top$ be returns of $d$ assets, with covariance matrix $\Sigma$, and let $\bm{w}$ be a vector of portfolio weights (summing to 1, say). 
+Then the portfolio return is $R_p = \bm{w}^\top \bm{R}$, and
+\[
+\operatorname{Var}(R_p) = \bm{w}^\top \Sigma \bm{w}.
+\]
+This formula highlights how both individual variances and cross-asset covariances contribute to risk.
+
+\end{example}
+
+\subsection{Multivariate Normal Distribution}
+
+\begin{definition}[Multivariate normal]
+A random vector $\bm{X} \in \mathbb{R}^d$ is \textbf{multivariate normal} with mean $\bm{\mu}$ and covariance $\Sigma$ (positive definite), written $\bm{X} \sim N_d(\bm{\mu},\Sigma)$, if its pdf is
+\[
+f_{\bm{X}}(\bm{x}) =
+\frac{1}{(2\pi)^{d/2} |\Sigma|^{1/2}}
+\exp\left(
+-\frac{1}{2}(\bm{x}-\bm{\mu})^\top \Sigma^{-1} (\bm{x}-\bm{\mu})
+\right).
+\]
+\end{definition}
+
+Important properties:
+\begin{itemize}
+    \item Any linear combination $\bm{a}^\top \bm{X}$ is univariate normal.
+    \item Any sub-vector is multivariate normal.
+    \item Conditional distributions are (again) multivariate normal with explicit formulas for the mean and covariance.
+\end{itemize}
+
+\begin{example}[Bivariate normal regression view]
+Consider $(X,Y)^\top \sim N_2(\bm{\mu},\Sigma)$ where
+\[
+\bm{\mu} =
+\begin{pmatrix}\mu_X \\ \mu_Y\end{pmatrix},
+\quad
+\Sigma = \begin{pmatrix}
+\sigma_X^2 & \rho\sigma_X\sigma_Y\\
+\rho\sigma_X\sigma_Y & \sigma_Y^2
+\end{pmatrix}.
+\]
+Then the conditional distribution of $Y$ given $X=x$ is normal with
+\[
+E[Y \mid X=x] = \mu_Y + \rho\frac{\sigma_Y}{\sigma_X}(x-\mu_X),
+\]
+\[
+\operatorname{Var}(Y \mid X=x) = \sigma_Y^2(1-\rho^2).
+\]
+This is a probabilistic origin of simple linear regression: the conditional mean is a linear function of $x$ with slope $\rho \sigma_Y /\sigma_X$.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conditional Expectation and Laws of Total Expectation/Variance}
+
+\subsection{Conditional Expectation}
+
+\begin{definition}[Conditional expectation (discrete case)]
+For discrete random variables $X,Y$, the conditional expectation of $X$ given $Y$ is
+\[
+E[X \mid Y=y] = \sum_{x} x\, P(X=x \mid Y=y).
+\]
+\end{definition}
+
+In the continuous case, replace the sum with an integral involving conditional densities. 
+More abstractly, $E[X \mid Y]$ is itself a random variable (a function of $Y$) that averages $X$ over the uncertainty remaining after knowing $Y$.
+
+\begin{example}[Tower property intuition]
+Let $X$ be daily P\&L and $Y$ be a market regime indicator (e.g. bull/bear). 
+Then $E[X \mid Y]$ is the expected P\&L in each regime. 
+If you then average these regime-specific expectations weighted by the probabilities of each regime, you get the unconditional expected P\&L:
+\[
+E[X] = E[E[X \mid Y]].
+\]
+
+\end{example}
+
+\subsection{Law of Total Expectation}
+
+\begin{theorem}[Law of total expectation]
+For random variables $X,Y$,
+\[
+E[X] = E\big[ E[X \mid Y] \big].
+\]
+\end{theorem}
+
+This is sometimes called the ``tower property'' because applying conditional expectations in nested fashion works like climbing up/down a tower of sigma-algebras.
+
+\subsection{Law of Total Variance}
+
+\begin{theorem}[Law of total variance]
+For random variables $X,Y$,
+\[
+\operatorname{Var}(X) = E\big[\operatorname{Var}(X \mid Y)\big]
++ \operatorname{Var}\big( E[X \mid Y] \big).
+\]
+\end{theorem}
+
+Interpretation: total variability of $X$ is the sum of:
+\begin{itemize}
+    \item expected remaining variance of $X$ after conditioning on $Y$;
+    \item variance of the conditional means themselves (how different the regimes are).
+\end{itemize}
+
+\begin{example}[Risk decomposition]
+Let $X$ be daily P\&L and $Y$ be a volatility regime (low, medium, high). 
+Then
+\[
+\operatorname{Var}(X) = E[\operatorname{Var}(X \mid Y)] + \operatorname{Var}(E[X \mid Y]).
+\]
+The first term represents within-regime risk (how variable P\&L is inside each volatility regime), while the second term captures between-regime risk (how different the average P\&L is across regimes). 
+This decomposition is useful for understanding where most of your risk comes from.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Sampling Distributions: \texorpdfstring{$\chi^2$}{chi-square}, t, and F}
+\label{sec:sampling-dists}
+
+\subsection{Chi-Square Distribution}
+
+\begin{definition}[Chi-square distribution]
+If $Z_1,\dots,Z_k$ are independent $N(0,1)$ random variables, then
+\[
+Q = \sum_{i=1}^k Z_i^2
+\]
+has a \textbf{chi-square} distribution with $k$ degrees of freedom, written $Q \sim \chi_k^2$.
+\end{definition}
+
+Chi-square distributions arise naturally as sums of squared standardized residuals and as sampling distributions of variance estimators under normality.
+
+\subsection{Student's t Distribution}
+
+\begin{definition}[Student's t]
+If $Z \sim N(0,1)$ and $Q \sim \chi_\nu^2$ are independent, then
+\[
+T = \frac{Z}{\sqrt{Q/\nu}}
+\]
+has a \textbf{Student's t} distribution with $\nu$ degrees of freedom.
+\end{definition}
+
+In practice, $T$ appears when we replace the population standard deviation by the sample standard deviation in a normal model.
+
+\begin{example}[t-statistic for mean]
+Let $X_1,\dots,X_n$ be i.i.d. $N(\mu,\sigma^2)$. 
+Then
+\[
+T = \frac{\bar{X} - \mu}{S/\sqrt{n}}
+\]
+has a t-distribution with $n-1$ degrees of freedom, where $S^2$ is the sample variance. 
+This is the basis of t-tests and t-based confidence intervals for the mean when $\sigma^2$ is unknown.
+
+\end{example}
+
+\subsection{F Distribution}
+
+\begin{definition}[F distribution]
+If $Q_1 \sim \chi_{d_1}^2$ and $Q_2 \sim \chi_{d_2}^2$ are independent, then
+\[
+F = \frac{Q_1/d_1}{Q_2/d_2}
+\]
+has an \textbf{F distribution} with $(d_1,d_2)$ degrees of freedom.
+\end{definition}
+
+F distributions appear as ratios of variance estimates and are central to analysis of variance (ANOVA) and multiple regression F-tests.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Point Estimation: Properties and Constructions}
+
+\subsection{Desirable Properties of Estimators}
+
+Let $\theta$ be a parameter and $\hat{\theta}_n$ an estimator based on a sample of size $n$.
+
+\begin{itemize}
+    \item \textbf{Unbiasedness}: $E[\hat{\theta}_n] = \theta$.
+    \item \textbf{Consistency}: $\hat{\theta}_n \xrightarrow{P} \theta$ as $n\to\infty$.
+    \item \textbf{Mean squared error (MSE)}: $E[(\hat{\theta}_n - \theta)^2]$.
+\end{itemize}
+
+Unbiasedness is about the average location of the estimator; consistency is about its long-run behavior; MSE balances bias and variance.
+
+\begin{example}[Biased vs. unbiased variance]
+For i.i.d. $X_1,\dots,X_n$ with mean $\mu$ and variance $\sigma^2$, define
+\[
+S_n^2 = \frac{1}{n-1}\sum_{i=1}^n (X_i - \bar{X})^2,
+\quad
+S_n^{2\prime} = \frac{1}{n}\sum_{i=1}^n (X_i - \bar{X})^2.
+\]
+Then $E[S_n^2] = \sigma^2$ (unbiased), but $E[S_n^{2\prime}] = \frac{n-1}{n}\sigma^2$ (biased). 
+However, both are consistent for $\sigma^2$ since the bias of $S_n^{2\prime}$ shrinks as $n$ grows.
+
+\end{example}
+
+\subsection{Method of Moments}
+
+The \textbf{method of moments} matches sample moments to theoretical moments.
+
+\begin{example}[Poisson mean by method of moments]
+Let $X_1,\dots,X_n$ be i.i.d. Poisson$(\lambda)$. 
+The theoretical mean is $E[X_i] = \lambda$. 
+The sample mean is $\bar{X}$. 
+Method of moments sets
+\[
+\bar{X} = \lambda \quad \Rightarrow \quad \hat{\lambda}_{\text{MM}} = \bar{X}.
+\]
+This is intuitive: the average count is a natural estimate of the underlying rate.
+
+\end{example}
+
+\subsection{Maximum Likelihood Estimation (MLE)}
+
+Let $X_1,\dots,X_n$ be i.i.d. with density/pmf $f(x;\theta)$. 
+The \textbf{likelihood} is
+\[
+L(\theta) = \prod_{i=1}^n f(X_i;\theta),
+\]
+and the log-likelihood is $\ell(\theta) = \log L(\theta)$. 
+An MLE $\hat{\theta}_{\text{MLE}}$ maximizes $L(\theta)$ (or $\ell(\theta)$).
+
+\begin{example}[Normal mean and variance]
+Suppose $X_1,\dots,X_n$ are i.i.d. $N(\mu,\sigma^2)$ with both $\mu,\sigma^2$ unknown. 
+The log-likelihood is
+\[
+\ell(\mu,\sigma^2)
+= -\frac{n}{2}\log(2\pi) - \frac{n}{2}\log\sigma^2
+- \frac{1}{2\sigma^2}\sum_{i=1}^n (X_i-\mu)^2.
+\]
+Differentiating with respect to $\mu$ and setting to zero gives
+\[
+\hat{\mu}_{\text{MLE}} = \bar{X}.
+\]
+Differentiating with respect to $\sigma^2$, solving gives
+\[
+\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n}\sum_{i=1}^n (X_i - \bar{X})^2.
+\]
+So the MLE for $\mu$ is the sample mean, and the MLE for $\sigma^2$ is the sample variance with divisor $n$ (the biased version but consistent).
+
+\end{example}
+
+\subsection{Asymptotic Normality of MLEs}
+
+Under regularity conditions, if $\hat{\theta}_{\text{MLE}}$ is the MLE for a scalar parameter $\theta_0$, then
+\[
+\sqrt{n}(\hat{\theta}_{\text{MLE}} - \theta_0)
+\Rightarrow N\left(0,\,\frac{1}{I(\theta_0)}\right),
+\]
+where $I(\theta_0)$ is the Fisher information, often defined as
+\[
+I(\theta_0) = E\left[ -\frac{\partial^2}{\partial \theta^2} \ell(\theta_0) \right].
+\]
+
+This yields approximate confidence intervals for $\theta_0$ based on the curvature of the log-likelihood around its maximum.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Sufficiency and Exponential Families}
+
+\subsection{Sufficient Statistics}
+
+\begin{definition}[Sufficient statistic]
+A statistic $T(X_1,\dots,X_n)$ is \textbf{sufficient} for parameter $\theta$ if the conditional distribution of the data given $T$ does not depend on $\theta$.
+\end{definition}
+
+Intuitively, once you know $T$, the remaining information in the sample about $\theta$ is exhausted.
+
+\subsection{Factorization Theorem}
+
+\begin{theorem}[Neyman–Fisher factorization]
+A statistic $T(\bm{X})$ is sufficient for $\theta$ if and only if the joint density/pmf can be written as
+\[
+f(\bm{x};\theta) = g_\theta(T(\bm{x}))\, h(\bm{x}),
+\]
+for some non-negative functions $g_\theta$ and $h$.
+\end{theorem}
+
+\begin{example}[Normal family]
+Let $X_1,\dots,X_n$ be i.i.d. $N(\mu,\sigma^2)$ with $\sigma^2$ known. 
+The joint density is
+\[
+f(\bm{x};\mu) \propto
+\exp\left(
+-\frac{1}{2\sigma^2}\sum_{i=1}^n (x_i - \mu)^2
+\right).
+\]
+Expanding the square,
+\[
+\sum (x_i - \mu)^2
+= \sum x_i^2 - 2\mu\sum x_i + n\mu^2.
+\]
+Thus
+\[
+f(\bm{x};\mu)
+= h(\bm{x}) \cdot g_\mu\Big(\sum x_i\Big),
+\]
+where $h(\bm{x})$ does not depend on $\mu$ and $g_\mu$ depends on $\bm{x}$ only through $\sum x_i$ (equivalently $\bar{X}$). 
+So $\sum X_i$ (or $\bar{X}$) is a sufficient statistic for $\mu$.
+
+\end{example}
+
+\subsection{Exponential Families}
+
+A family of densities has an \textbf{exponential family} form if it can be written as
+\[
+f(x;\theta) = h(x)\, \exp\left(\eta(\theta)^\top T(x) - A(\theta)\right).
+\]
+
+Many common distributions (Normal, Poisson, Exponential, Binomial) are exponential families. 
+In such families, $T(x)$ is typically a sufficient statistic, and properties like conjugate priors in Bayesian analysis become simpler.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Hypothesis Testing: Neyman–Pearson and Likelihood Ratio Tests}
+\label{sec:tests}
+
+\subsection{Neyman–Pearson Lemma (Simple vs. Simple)}
+
+Consider testing
+\[
+H_0: \theta = \theta_0 \quad \text{vs.} \quad H_1: \theta = \theta_1,
+\]
+where both are simple hypotheses. 
+Let $f(x;\theta_0)$ and $f(x;\theta_1)$ be the corresponding densities.
+
+The Neyman–Pearson lemma states that the most powerful test (for a given level $\alpha$) rejects $H_0$ for large values of the likelihood ratio
+\[
+\Lambda(x) = \frac{f(x;\theta_0)}{f(x;\theta_1)}.
+\]
+
+Equivalently, we can reject for small $\Lambda(x)$; it's common to work with $-2\log\Lambda$.
+
+\subsection{Likelihood Ratio Tests (LRTs)}
+
+For general tests $H_0:\theta \in \Theta_0$ vs. $H_1:\theta \in \Theta_1$, define the likelihood ratio statistic
+\[
+\Lambda(x) = \frac{\sup_{\theta \in \Theta_0} L(\theta)}{\sup_{\theta \in \Theta} L(\theta)}.
+\]
+We reject $H_0$ for small values of $\Lambda(x)$.
+
+Under regularity conditions, and when $H_0$ is true, Wilks' theorem says that
+\[
+-2\log\Lambda(X) \overset{\text{approx}}{\sim} \chi^2_{k},
+\]
+where $k$ is the difference in dimensionality between $\Theta$ and $\Theta_0$.
+
+\begin{example}[Testing a normal mean, variance unknown]
+Let $X_1,\dots,X_n$ be i.i.d. $N(\mu,\sigma^2)$ with $\sigma^2$ unknown. 
+We test $H_0:\mu=\mu_0$ vs. $H_1:\mu\ne\mu_0$. 
+The full MLEs $(\hat{\mu},\hat{\sigma}^2)$ maximize the likelihood over both parameters; under $H_0$, we fix $\mu=\mu_0$ and maximize over $\sigma^2$ only. 
+Computing $-2\log\Lambda$ leads (after algebra) to a function of the t-statistic
+\[
+T = \frac{\bar{X} - \mu_0}{S/\sqrt{n}}.
+\]
+Thus the classical t-test can be seen as a likelihood ratio test in this normal model.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Bayesian Inference Basics}
+\label{sec:bayes}
+
+\subsection{Bayes' Rule for Parameters}
+
+In Bayesian inference, we treat the parameter $\theta$ as a random variable with prior density $\pi(\theta)$. 
+Given data $x$, the posterior density is
+\[
+\pi(\theta \mid x) =
+\frac{f(x \mid \theta)\,\pi(\theta)}{\int f(x \mid \theta')\,\pi(\theta')\,d\theta'}.
+\]
+
+The numerator is the unnormalized posterior, and the denominator is the marginal likelihood $f(x)$.
+
+\subsection{Conjugate Priors}
+
+A \textbf{conjugate prior} is one for which the posterior distribution is in the same family as the prior.
+
+\begin{example}[Binomial-Beta model]
+Let $X \mid p \sim \text{Binomial}(n,p)$ and prior $p \sim \text{Beta}(\alpha,\beta)$. 
+The likelihood is
+\[
+f(x \mid p) \propto p^x(1-p)^{n-x},
+\]
+and the prior density is
+\[
+\pi(p) \propto p^{\alpha-1}(1-p)^{\beta-1}.
+\]
+Multiplying,
+\[
+\pi(p \mid x) \propto p^{x+\alpha-1}(1-p)^{n-x+\beta-1},
+\]
+which is a Beta$(\alpha+x,\beta+n-x)$ density. 
+So the Beta prior is conjugate to the Binomial likelihood.
+
+\end{example}
+
+\subsection{Posterior Mean and Credible Intervals}
+
+A common Bayesian point estimate is the \textbf{posterior mean} $E[\theta \mid x]$. 
+Intervals $(a,b)$ with
+\[
+P(a < \theta < b \mid x) = 0.95
+\]
+are called 95\% \textbf{credible intervals}.
+
+\begin{example}[Posterior mean in Binomial-Beta]
+In the Beta-Binomial example, if the prior is Beta$(\alpha,\beta)$ and we observe $x$ successes out of $n$, the posterior is Beta$(\alpha+x,\beta+n-x)$. 
+The posterior mean is
+\[
+E[p \mid x] = \frac{\alpha + x}{\alpha + \beta + n}.
+\]
+This can be viewed as a weighted average of the prior mean and the sample proportion $x/n$, with weights depending on the prior strength $(\alpha+\beta)$ vs.\ data size $n$.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Multiple Linear Regression in Matrix Form}
+
+\subsection{Model and Least Squares Estimator}
+
+The multiple linear regression model is
+\[
+\bm{y} = X\bm{\beta} + \bm{\varepsilon},
+\]
+where:
+\begin{itemize}
+    \item $\bm{y}$ is an $n \times 1$ response vector.
+    \item $X$ is an $n \times p$ design matrix (first column often ones for intercept).
+    \item $\bm{\beta}$ is a $p \times 1$ vector of coefficients.
+    \item $\bm{\varepsilon}$ is an $n \times 1$ error vector.
+\end{itemize}
+
+The least squares estimator solves
+\[
+\hat{\bm{\beta}} = \arg\min_{\bm{\beta}} \|\bm{y} - X\bm{\beta}\|^2.
+\]
+Assuming $X^\top X$ is invertible,
+\[
+\hat{\bm{\beta}} = (X^\top X)^{-1} X^\top \bm{y}.
+\]
+
+\subsection{Gauss–Markov Theorem}
+
+Assume the errors have $E[\bm{\varepsilon}] = 0$ and $\operatorname{Cov}(\bm{\varepsilon}) = \sigma^2 I_n$ (homoskedastic and uncorrelated). 
+Then $\hat{\bm{\beta}}$ is unbiased and has covariance
+\[
+\operatorname{Cov}(\hat{\bm{\beta}}) = \sigma^2 (X^\top X)^{-1}.
+\]
+
+The Gauss–Markov theorem states that among all linear unbiased estimators of $C\bm{\beta}$ (for any fixed matrix $C$), $C\hat{\bm{\beta}}$ has the smallest variance. 
+So ordinary least squares (OLS) is the best linear unbiased estimator (BLUE).
+
+\begin{example}[Predicting returns from factors]
+Let $\bm{y}$ be the vector of daily excess returns of a stock, and $X$ the matrix of factor returns (e.g., market, size, value factors). 
+The model
+\[
+\bm{y} = X\bm{\beta} + \bm{\varepsilon}
+\]
+estimates the factor loadings $\bm{\beta}$. 
+The OLS estimate $\hat{\bm{\beta}}$ gives the best linear unbiased estimate of these loadings under the usual regression assumptions, and the covariance matrix $\hat{\sigma}^2 (X^\top X)^{-1}$ quantifies uncertainty in the loadings.
+
+\end{example}
+
+\subsection{Inference and F-tests}
+
+Under the stronger assumption $\bm{\varepsilon} \sim N(\bm{0}, \sigma^2 I_n)$, we can derive exact sampling distributions:
+\begin{itemize}
+    \item $\hat{\bm{\beta}}$ is multivariate normal.
+    \item $S^2 = \frac{1}{n-p}\|\bm{y} - X\hat{\bm{\beta}}\|^2$ is an unbiased estimator of $\sigma^2$.
+\end{itemize}
+
+Individual coefficients can be tested via t-statistics; sets of coefficients (e.g., testing whether a group of predictors jointly has zero effect) can be tested via F-statistics constructed from sums of squared residuals under full and reduced models.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Logistic Regression Overview}
+
+\subsection{Binary Response Model}
+
+When the response $Y$ is binary (0/1), a linear model for $E[Y\mid \bm{X}]$ is often inappropriate because it can produce values outside $[0,1]$. 
+Logistic regression models the probability
+\[
+\pi(\bm{x}) = P(Y=1 \mid \bm{X}=\bm{x})
+\]
+via the \textbf{logit} link:
+\[
+\log\frac{\pi(\bm{x})}{1 - \pi(\bm{x})} = \bm{\beta}^\top \bm{x}.
+\]
+
+\subsection{Interpretation}
+
+Solving for $\pi(\bm{x})$ gives
+\[
+\pi(\bm{x})
+= \frac{\exp(\bm{\beta}^\top \bm{x})}{1 + \exp(\bm{\beta}^\top \bm{x})}.
+\]
+
+Each coefficient $\beta_j$ represents the change in the log-odds per unit increase in $x_j$ holding other variables fixed. 
+Exponentiating $\beta_j$ gives the odds ratio.
+
+\begin{example}[Default probability]
+Let $Y$ indicate whether a borrower defaults ($1$) or not ($0$), and let $X_1$ be the debt-to-income ratio, $X_2$ a credit score. 
+A logistic regression model
+\[
+\log\frac{\pi}{1-\pi} = \beta_0 + \beta_1 X_1 + \beta_2 X_2
+\]
+relates log-odds of default to these predictors. 
+If $\hat{\beta}_1 = 0.05$, then increasing $X_1$ by 1 unit multiplies the odds of default by $\exp(0.05) \approx 1.051$, or about a 5.1\% increase in the odds, holding credit score fixed.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Resampling and the Bootstrap}
+\label{sec:bootstrap}
+
+\subsection{Motivation}
+
+Analytical formulas for the sampling distribution of an estimator can be complex or unavailable, especially for non-standard statistics or in small samples. 
+The \textbf{bootstrap} approximates the sampling distribution by resampling from the data.
+
+\subsection{Nonparametric Bootstrap Algorithm}
+
+Given data $X_1,\dots,X_n$ and an estimator $\hat{\theta} = t(X_1,\dots,X_n)$:
+\begin{enumerate}
+    \item For $b=1,\dots,B$ (e.g., $B=1000$):
+    \begin{enumerate}
+        \item Draw a bootstrap sample $X_1^{*(b)},\dots,X_n^{*(b)}$ by sampling with replacement from $\{X_1,\dots,X_n\}$.
+        \item Compute the bootstrap replicate $\hat{\theta}^{*(b)} = t(X_1^{*(b)},\dots,X_n^{*(b)})$.
+    \end{enumerate}
+    \item Use the empirical distribution of $\{\hat{\theta}^{*(b)}\}_{b=1}^B$ to approximate the sampling distribution of $\hat{\theta}$.
+\end{enumerate}
+
+\subsection{Bootstrap Confidence Intervals}
+
+A simple percentile bootstrap interval for $\theta$ at level $(1-\alpha)$ is
+\[
+\Big(\hat{\theta}^{*(\alpha/2)}, \hat{\theta}^{*(1-\alpha/2)}\Big),
+\]
+where $\hat{\theta}^{*(q)}$ is the empirical $q$-quantile of the bootstrap replicates.
+
+\begin{example}[Bootstrap CI for median]
+Suppose $X_1,\dots,X_n$ are asset returns, and we are interested in the true median return $\theta$. 
+The sample median $\hat{\theta}$ has a complicated sampling distribution, especially for small $n$. 
+The bootstrap approach:
+\begin{enumerate}
+    \item Resample with replacement from the observed returns to create many bootstrap samples.
+    \item Compute the median for each sample.
+    \item Take the empirical 2.5\% and 97.5\% quantiles of these medians as a 95\% confidence interval.
+\end{enumerate}
+This gives a data-driven uncertainty quantification without relying on an explicit parametric model for returns.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Next Steps and Further Reading}
+
+This intermediate course has introduced:
+\begin{itemize}
+    \item More formal probability foundations and modes of convergence.
+    \item Asymptotic tools (CLT, delta method, mgfs/characteristic functions).
+    \item Multivariate distributions and conditional expectation.
+    \item Sampling distributions, point estimation (MLE, method of moments), sufficiency.
+    \item Classical hypothesis testing, Bayesian basics, and regression at a matrix level.
+    \item A first look at logistic regression and resampling methods like the bootstrap.
+\end{itemize}
+
+Natural next directions include:
+\begin{itemize}
+    \item Advanced likelihood theory and information inequalities.
+    \item Nonparametric estimation and smoothing methods.
+    \item Time series models (ARMA, GARCH) and stochastic processes.
+    \item Causal inference and experimental design.
+\end{itemize}
+
+Courses labeled ``mathematical statistics'' or ``fundamentals of statistics'' at universities often cover comparable material and provide problem sets and exam-style practice to consolidate these ideas.%
+\footnote{See, for example, MIT 18.650, various ``Intermediate Statistics'' and ``Mathematical Statistics'' syllabi.[web:32][web:36][web:38][web:40][web:41]}
+
+\end{document}

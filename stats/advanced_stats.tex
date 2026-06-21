@@ -1,0 +1,1015 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{mathtools}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    pdftitle={Advanced Probability and Statistics},
+    pdfauthor={Your Name}
+}
+
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{corollary}{Corollary}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{remark}{Remark}[section]
+
+\numberwithin{equation}{section}
+
+\title{Advanced Probability and Statistics\\[0.5em]
+       \large Measure-Theoretic Probability, Martingales, Stochastic Processes,\\
+       and Asymptotic Statistical Theory}
+\author{Theodosios Dimitrasopoulos\footnote{Email: theodosios.novak@gmail.com}}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{How to Use This Course}
+
+This document assumes familiarity with intermediate probability and statistics: random vectors, multivariate normal, basic convergence concepts, CLT, MLE, likelihood ratio tests, and linear models.%
+\footnote{Content and level are comparable to first-year graduate courses in measure-theoretic probability, advanced probability, and mathematical statistics syllabi.[web:61][web:62][web:69][web:71][web:72]}
+
+The aim is to develop a rigorous measure-theoretic foundation for probability and to connect it to modern statistical theory: martingales, Markov chains, Brownian motion and stochastic calculus, decision-theoretic estimation, and asymptotic likelihood theory. 
+Each major definition or theorem is followed by commentary and at least one illustrative example, often with a modeling flavor (e.g., finance, time series, Monte Carlo).
+
+A suggested path:
+\begin{enumerate}
+    \item Sections \ref{sec:measure-foundations}--\ref{sec:weak-conv}: measure, integration, convergence.
+    \item Sections \ref{sec:independence-bc}--\ref{sec:martingales}: independence, Borel--Cantelli, martingales.
+    \item Sections \ref{sec:markov}--\ref{sec:brownian}: Markov chains and Brownian motion.
+    \item Sections \ref{sec:decision}--\ref{sec:likelihood-asymptotics}: advanced mathematical statistics and likelihood asymptotics.
+    \item Sections \ref{sec:concentration}--\ref{sec:high-dim}: concentration, large deviations, and high-dimensional hints.
+\end{enumerate}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Measure-Theoretic Foundations of Probability}
+\label{sec:measure-foundations}
+
+\subsection{Measure Spaces and Probability Spaces}
+
+\begin{definition}[Sigma-algebra]
+Let $\Omega$ be a non-empty set. 
+A collection $\mathcal{F} \subseteq 2^\Omega$ is a \textbf{sigma-algebra} if:
+\begin{enumerate}[label=(\roman*)]
+    \item $\Omega \in \mathcal{F}$.
+    \item If $A \in \mathcal{F}$, then $A^c \in \mathcal{F}$.
+    \item If $A_1,A_2,\dots \in \mathcal{F}$, then $\displaystyle \bigcup_{n=1}^\infty A_n \in \mathcal{F}$.
+\end{enumerate}
+\end{definition}
+
+A sigma-algebra formalizes the idea of sets on which we can consistently define probabilities. 
+Closure under complements and countable unions ensures we can talk about ``or'', ``and'', and limits of events in a mathematically stable way.
+
+\begin{definition}[Measure and probability measure]
+A function $\mu : \mathcal{F} \to [0,\infty]$ is a \textbf{measure} if:
+\begin{enumerate}[label=(\roman*)]
+    \item $\mu(\varnothing) = 0$.
+    \item For disjoint $A_1,A_2,\dots \in \mathcal{F}$,
+    \[
+      \mu\Big(\bigcup_{n=1}^\infty A_n\Big)
+      = \sum_{n=1}^\infty \mu(A_n).
+    \]
+\end{enumerate}
+If in addition $\mu(\Omega)=1$, then $\mu$ is a \textbf{probability measure}.
+\end{definition}
+
+\begin{definition}[Probability space]
+A \textbf{probability space} is a triple $(\Omega,\mathcal{F},P)$ where $\mathcal{F}$ is a sigma-algebra on $\Omega$ and $P$ is a probability measure on $(\Omega,\mathcal{F})$.
+\end{definition}
+
+\subsection{Random Variables as Measurable Maps}
+
+\begin{definition}[Random variable]
+A function $X : (\Omega,\mathcal{F}) \to (\mathbb{R},\mathcal{B})$ is a \textbf{random variable} if it is measurable, i.e.,
+\[
+\{ \omega \in \Omega : X(\omega) \le x \} \in \mathcal{F}
+\quad\text{for all } x \in \mathbb{R},
+\]
+where $\mathcal{B}$ is the Borel sigma-algebra on $\mathbb{R}$.
+\end{definition}
+
+The measurability condition guarantees that events defined via $X$ (such as $\{X\le x\}$, $\{X\in A\}$) are valid events in $\mathcal{F}$. 
+From this viewpoint, a random variable is just a measurable transformation of the underlying probability space.
+
+\begin{definition}[Distribution of a random variable]
+The \textbf{distribution} of a random variable $X$ is the probability measure $P_X$ on $(\mathbb{R},\mathcal{B})$ defined by
+\[
+P_X(B) = P\big(X^{-1}(B)\big)
+= P(\{\omega : X(\omega) \in B\}),\quad B \in \mathcal{B}.
+\]
+\end{definition}
+
+\begin{example}[Pushforward measure for a function of a random variable]
+Let $X$ be a random variable on $(\Omega,\mathcal{F},P)$ and consider $Y = g(X)$ where $g:\mathbb{R}\to\mathbb{R}$ is Borel-measurable. 
+Then $Y$ is a random variable, and its distribution $P_Y$ is the \emph{pushforward} of $P_X$ by $g$. 
+This is the measure-theoretic formalization of ``applying a function to a random variable transforms its distribution''.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Integration and Expectation}
+
+\subsection{Lebesgue Integral}
+
+Let $(\Omega,\mathcal{F},P)$ be a probability space and $X$ a non-negative random variable. 
+The Lebesgue integral $\int X\,dP$ is defined via monotone approximations by simple functions.
+
+\begin{definition}[Simple function]
+A function $s:\Omega \to [0,\infty)$ is \textbf{simple} if it takes finitely many values:
+\[
+s(\omega) = \sum_{k=1}^n a_k \mathbf{1}_{A_k}(\omega),
+\]
+where $a_k \ge 0$ and $A_k \in \mathcal{F}$ are disjoint.
+\end{definition}
+
+For a simple function $s$, its integral is
+\[
+\int s\,dP = \sum_{k=1}^n a_k P(A_k).
+\]
+
+For a general non-negative random variable $X$, we approximate $X$ from below by an increasing sequence of simple functions $s_n \uparrow X$ and define
+\[
+\int X\,dP = \sup_{n} \int s_n\,dP.
+\]
+
+\begin{definition}[Expectation]
+If $X$ is integrable (i.e., $\int |X|\,dP < \infty$), its \textbf{expectation} is
+\[
+E[X] = \int X\,dP.
+\]
+\end{definition}
+
+This generalizes discrete sums and continuous Riemann integrals into one unified definition. 
+Expectation is linear, monotone, and continuous under certain limits (monotone or dominated convergence).
+
+\subsection{Monotone Convergence and Dominated Convergence}
+
+\begin{theorem}[Monotone Convergence Theorem]
+If $0 \le X_1 \le X_2 \le \dots$ and $X_n \uparrow X$ almost surely, then
+\[
+\lim_{n\to\infty} \int X_n\,dP = \int X\,dP.
+\]
+\end{theorem}
+
+\begin{theorem}[Dominated Convergence Theorem]
+Let $X_n$ be a sequence of random variables such that $X_n \to X$ almost surely and there exists an integrable $Y$ with $|X_n| \le Y$ almost surely for all $n$. 
+Then $X$ is integrable and
+\[
+\lim_{n\to\infty} \int X_n\,dP = \int X\,dP.
+\]
+\end{theorem}
+
+\begin{example}[Passing limit inside expectation for Monte Carlo estimators]
+Let $X_n(\omega) = \tfrac{1}{n}\sum_{i=1}^n g(Z_i(\omega))$ where $Z_i$ are i.i.d. with $E[|g(Z_1)|]<\infty$. 
+Then $X_n \to E[g(Z_1)]$ almost surely by the strong law. 
+If $|g(Z_i)|$ are dominated by an integrable $Y$, the dominated convergence theorem implies
+\[
+\lim_{n\to\infty} E[X_n] = E\big[ E[g(Z_1)] \big] = E[g(Z_1)].
+\]
+So one can interchange limit and expectation; this legitimizes taking limits in Monte Carlo approximations.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Modes of Convergence and Weak Convergence}
+\label{sec:weak-conv}
+
+\subsection{Almost Sure, In Probability, In $L^p$}
+
+We recall and sharpen the different convergence notions for random variables $X_n$ to $X$.
+
+\begin{itemize}
+    \item \textbf{Almost sure convergence}: $X_n \to X$ almost surely if
+    \[
+      P(\{\omega : X_n(\omega)\to X(\omega)\}) = 1.
+    \]
+    \item \textbf{Convergence in probability}: $X_n \xrightarrow{P} X$ if for every $\varepsilon>0$,
+    \[
+      \lim_{n\to\infty} P(|X_n - X| > \varepsilon) = 0.
+    \]
+    \item \textbf{Convergence in $L^p$}: $X_n \to X$ in $L^p$ if
+    \[
+      \lim_{n\to\infty} E[|X_n - X|^p] = 0,\quad 1 \le p < \infty.
+    \]
+\end{itemize}
+
+The implications are (for integrable variables):
+\[
+X_n \xrightarrow{L^p} X \Longrightarrow X_n \xrightarrow{P} X,
+\]
+and
+\[
+X_n \xrightarrow{\text{a.s.}} X \Longrightarrow X_n \xrightarrow{P} X.
+\]
+The converses generally fail, illustrating that these are genuinely different notions.
+
+\subsection{Weak Convergence of Distributions}
+
+\begin{definition}[Weak convergence]
+A sequence of random variables $X_n$ converges in distribution (or weakly) to $X$, written $X_n \Rightarrow X$, if
+\[
+\lim_{n\to\infty} F_{X_n}(x) = F_X(x)
+\]
+for all $x$ at which $F_X$ is continuous.
+\end{definition}
+
+Weak convergence is about distributions, not sample paths. 
+It is the right notion for CLT-type results, large deviations, and asymptotic distributions of estimators.
+
+\begin{theorem}[Continuous Mapping Theorem]
+If $X_n \Rightarrow X$ and $g$ is continuous, then $g(X_n) \Rightarrow g(X)$.
+\end{theorem}
+
+\begin{example}[Delta method revisited]
+If $\sqrt{n}(T_n-\theta) \Rightarrow N(0,\tau^2)$ and $g$ is differentiable at $\theta$ with $g'(\theta)\ne 0$, then by a Taylor expansion and the continuous mapping theorem,
+\[
+\sqrt{n}\big(g(T_n)-g(\theta)\big) \Rightarrow N\big(0,(g'(\theta))^2\tau^2\big).
+\]
+This formalizes the intuitive idea that small perturbations in $T_n$ are linearly amplified by $g$ in the limit.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Independence, Borel--Cantelli, and Zero--One Laws}
+\label{sec:independence-bc}
+
+\subsection{Independence of Sigma-Algebras and Random Variables}
+
+\begin{definition}[Independence of sigma-algebras]
+Sigma-algebras $\mathcal{F}_1,\dots,\mathcal{F}_n$ are \textbf{independent} if
+\[
+P(A_1\cap\cdots\cap A_n) = \prod_{i=1}^n P(A_i)
+\]
+for all $A_i\in \mathcal{F}_i$.
+\end{definition}
+
+Random variables $X_i$ are independent if the sigma-algebras they generate are independent. 
+This abstraction is crucial for product probability spaces and infinite collections of variables.
+
+\subsection{Borel--Cantelli Lemmas}
+
+\begin{theorem}[First Borel--Cantelli Lemma]
+If $A_1,A_2,\dots$ is a sequence of events with
+\[
+\sum_{n=1}^\infty P(A_n) < \infty,
+\]
+then
+\[
+P(A_n \text{ i.o.}) = 0,
+\]
+where ``i.o.'' means ``infinitely often''.
+\end{theorem}
+
+This says that if the total expected number of occurrences is finite, then with probability 1, only finitely many occur.
+
+\begin{theorem}[Second Borel--Cantelli Lemma]
+If $A_1,A_2,\dots$ are independent events and
+\[
+\sum_{n=1}^\infty P(A_n) = \infty,
+\]
+then
+\[
+P(A_n \text{ i.o.}) = 1.
+\]
+\end{theorem}
+
+\begin{example}[Gambler eventually goes broke?]
+Let $A_n$ be the event that a gambler's fortune hits zero on day $n$. 
+If the $A_n$ were independent and the sum of their probabilities diverged, Borel--Cantelli would say the gambler will go broke infinitely often with probability 1. 
+In realistic models, the $A_n$ are not independent, but Borel--Cantelli still provides insight: if ruin probabilities per day decay slowly enough, ruin becomes almost certain in the long run.
+
+\end{example}
+
+\subsection{Kolmogorov Zero--One Law}
+
+\begin{definition}[Tail sigma-algebra]
+For a sequence of random variables $(X_n)$, the \textbf{tail sigma-algebra} is
+\[
+\mathcal{T} = \bigcap_{n=1}^\infty \sigma(X_k : k\ge n).
+\]
+\end{definition}
+
+\begin{theorem}[Kolmogorov zero--one law]
+If $(X_n)$ are independent random variables, then any event $A \in \mathcal{T}$ has probability $0$ or $1$.
+\end{theorem}
+
+Tail events depend only on what happens ``in the long run''. 
+The zero--one law says there is no meaningful randomness left at infinity: such events either almost surely happen or almost surely do not.
+
+\begin{example}[Convergence events]
+For independent $(X_n)$, the event $\{\limsup X_n = \infty\}$ is a tail event. 
+Hence it has probability 0 or 1. 
+Determining which requires additional information, but the zero--one law tells us there are no intermediate probabilities for such long-run behaviors.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Strong Laws, Central Limit Theorems, and LIL}
+
+\subsection{Kolmogorov's Strong Law of Large Numbers}
+
+Let $(X_n)$ be independent with $E[X_n]=0$ and $\sum_{n=1}^\infty \operatorname{Var}(X_n)/n^2 < \infty$. 
+Then
+\[
+\frac{1}{n}\sum_{k=1}^n X_k \xrightarrow{\text{a.s.}} 0.
+\]
+
+For i.i.d.\ $X_n$ with $E[|X_1|]<\infty$, we get the classical strong law:
+\[
+\bar{X}_n \xrightarrow{\text{a.s.}} E[X_1].
+\]
+
+\subsection{Lindeberg--Feller CLT}
+
+\begin{theorem}[Lindeberg--Feller CLT, simplified]
+Let $X_{n,k}$ be a triangular array of independent mean-zero random variables with variances $\sigma_{n,k}^2$, and define
+\[
+s_n^2 = \sum_{k=1}^{k_n} \sigma_{n,k}^2.
+\]
+If $s_n^2 \to \sigma^2 > 0$ and Lindeberg's condition holds:
+\[
+\forall \varepsilon>0,\quad 
+\lim_{n\to\infty} \frac{1}{s_n^2}\sum_{k=1}^{k_n} E\big[
+X_{n,k}^2 \mathbf{1}_{\{|X_{n,k}|>\varepsilon s_n\}}
+\big] = 0,
+\]
+then
+\[
+\frac{1}{s_n}\sum_{k=1}^{k_n} X_{n,k} \Rightarrow N(0,\sigma^2).
+\]
+\end{theorem}
+
+This generalizes the classical CLT to independent but not identically distributed variables, as long as no single term dominates the variance and the Lindeberg condition controls large jumps.
+
+\subsection{Law of the Iterated Logarithm (LIL)}
+
+For i.i.d.\ mean-zero variance-one variables $X_n$, define partial sums $S_n = \sum_{k=1}^n X_k$. 
+The LIL states that almost surely,
+\[
+\limsup_{n\to\infty} \frac{S_n}{\sqrt{2n\log\log n}} = 1,\quad
+\liminf_{n\to\infty} \frac{S_n}{\sqrt{2n\log\log n}} = -1.
+\]
+
+This describes the ultimate envelope of fluctuations of $S_n$: although $S_n$ is of order $\sqrt{n}$, the $\sqrt{2n\log\log n}$ normalization captures the extreme oscillations infinitely often.
+
+\begin{example}[Random walk extremes]
+Consider an unbiased random walk $S_n$ on $\mathbb{Z}$ with step $\pm 1$. 
+The LIL tells you that $S_n$ visits arbitrarily large values of the order $\sqrt{2n\log\log n}$ infinitely often, but almost never significantly larger relative to this scale. 
+For finance, it hints at how extreme deviations from expected P\&L can scale with horizon when modeling returns as sums of independent shocks.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conditional Expectation as Projection and Martingales}
+\label{sec:martingales}
+
+\subsection{Conditional Expectation w.r.t.\ a Sigma-Algebra}
+
+\begin{definition}[Conditional expectation]
+Let $X$ be integrable and $\mathcal{G} \subseteq \mathcal{F}$ a sub-sigma-algebra. 
+A random variable $Y$ is the \textbf{conditional expectation} of $X$ given $\mathcal{G}$, written $Y = E[X \mid \mathcal{G}]$, if:
+\begin{enumerate}[label=(\roman*)]
+    \item $Y$ is $\mathcal{G}$-measurable.
+    \item For all $G \in \mathcal{G}$,
+    \[
+    \int_G Y\,dP = \int_G X\,dP.
+    \]
+\end{enumerate}
+\end{definition}
+
+Intuitively, $E[X \mid \mathcal{G}]$ is the best $\mathcal{G}$-measurable approximation to $X$ in $L^2$ sense; it is the orthogonal projection of $X$ onto the closed subspace of $\mathcal{G}$-measurable square-integrable random variables.
+
+\subsection{Martingales}
+
+\begin{definition}[Martingale]
+Let $(\mathcal{F}_n)$ be a filtration, i.e., an increasing sequence of sigma-algebras. 
+A sequence $(M_n)$ of integrable random variables is a \textbf{martingale} w.r.t.\ $(\mathcal{F}_n)$ if:
+\begin{enumerate}[label=(\roman*)]
+    \item $M_n$ is $\mathcal{F}_n$-measurable.
+    \item $E[|M_n|]<\infty$.
+    \item $E[M_{n+1} \mid \mathcal{F}_n] = M_n$ almost surely.
+\end{enumerate}
+\end{definition}
+
+A martingale models a ``fair game'': the conditional expectation of tomorrow's value given today's information is today's value.
+
+\begin{example}[Discounted asset price under risk-neutral measure]
+In arbitrage-free pricing, under a risk-neutral measure $Q$ and constant interest rate $r$, the discounted asset price process
+\[
+M_n = e^{-rn} S_n
+\]
+is typically a martingale w.r.t.\ the natural filtration of $(S_n)$. 
+This encodes the idea that, under risk-neutral probabilities, the expected discounted price tomorrow equals today's discounted price.
+
+\end{example}
+
+\subsection{Optional Stopping and Doob's Inequalities}
+
+\begin{definition}[Stopping time]
+A random time $\tau:\Omega\to\{0,1,2,\dots,\infty\}$ is a \textbf{stopping time} w.r.t.\ $(\mathcal{F}_n)$ if $\{\tau \le n\}\in \mathcal{F}_n$ for all $n$.
+\end{definition}
+
+\begin{theorem}[Optional Stopping (simplified)]
+Let $(M_n)$ be a martingale and $\tau$ a bounded stopping time (i.e., $\tau \le N$ almost surely). 
+Then
+\[
+E[M_\tau] = E[M_0].
+\]
+\end{theorem}
+
+This formalizes the idea that you cannot beat a fair game by deciding when to stop, as long as your stopping rule is based on current information and bounded.
+
+\begin{theorem}[Doob's $L^p$ Inequality (simplified)]
+If $(M_n)$ is a martingale with $M_0=0$ and $1<p<\infty$, then there exists $C_p$ such that
+\[
+E\big[\max_{1\le k\le n} |M_k|^p\big]
+\le C_p\, E[|M_n|^p].
+\]
+\end{theorem}
+
+This inequality controls the maximal fluctuations of a martingale in terms of its terminal value, a crucial tool in proving convergence and limit theorems.
+
+\subsection{Martingale Convergence}
+
+\begin{theorem}[Martingale Convergence Theorem, one version]
+Let $(M_n)$ be a martingale that is bounded in $L^1$ (i.e., $\sup_n E[|M_n|]<\infty$). 
+Then there exists an integrable random variable $M_\infty$ such that
+\[
+M_n \xrightarrow{\text{a.s.}} M_\infty
+\quad\text{and}\quad
+M_n \xrightarrow{L^1} M_\infty.
+\]
+\end{theorem}
+
+This says fair games with uniformly bounded expected absolute value converge almost surely to a limiting random variable; in finance, it relates to terminal values under risk-neutral measures.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discrete-Time Markov Chains}
+\label{sec:markov}
+
+\subsection{Definitions}
+
+\begin{definition}[Markov chain]
+A sequence $(X_n)_{n\ge 0}$ of random variables on a countable state space $S$ is a \textbf{Markov chain} with transition probabilities $P=(p_{ij})$ if
+\[
+P(X_{n+1}=j \mid X_n=i, X_{n-1}=i_{n-1},\dots,X_0=i_0)
+= P(X_{n+1}=j \mid X_n=i) = p_{ij},
+\]
+for all states $i_0,\dots,i_{n-1},i,j\in S$.
+\end{definition}
+
+This expresses the \emph{Markov property}: the future depends on the past only through the present.
+
+\subsection{Transition Probabilities and $n$-Step Transitions}
+
+The $n$-step transition probabilities are
+\[
+p_{ij}^{(n)} = P(X_n=j \mid X_0=i).
+\]
+
+These can be computed via matrix powers:
+\[
+P^{(n)} = P^n,\quad\text{where } (P^n)_{ij} = p_{ij}^{(n)}.
+\]
+
+\subsection{Classification of States and Stationary Distributions}
+
+States can be recurrent or transient, periodic or aperiodic, and the chain may be irreducible (every state communicates with every other). 
+A probability vector $\pi$ on $S$ is \textbf{stationary} if
+\[
+\pi^\top P = \pi^\top.
+\]
+
+\begin{example}[Random walk on integers mod $m$]
+Let $S=\{0,1,\dots,m-1\}$ and
+\[
+P(X_{n+1} = i+1 \mod m \mid X_n=i) = 1.
+\]
+Then the chain just cycles deterministically through the states; every state is visited, but the chain is periodic with period $m$. 
+A stationary distribution exists (uniform on $S$), but the chain does not converge to it from all starting states because of periodicity.
+
+\end{example}
+
+\subsection{Ergodic Theorem for Markov Chains}
+
+Under irreducibility, aperiodicity, and positive recurrence, a unique stationary distribution $\pi$ exists and
+\[
+\lim_{n\to\infty} p_{ij}^{(n)} = \pi_j,\quad \forall i,j.
+\]
+Moreover, time-averages converge almost surely:
+\[
+\frac{1}{n}\sum_{k=1}^n f(X_k) \xrightarrow{\text{a.s.}} \sum_{j\in S} f(j)\,\pi_j,
+\]
+for any bounded function $f$. 
+This is an ergodic theorem: sample paths reveal stationary expectations in the long run.
+
+\begin{example}[MCMC intuition]
+In Markov chain Monte Carlo, you construct a Markov chain whose stationary distribution is the target $\pi$. 
+The ergodic theorem justifies using long-run averages of $f(X_k)$ along the chain to estimate $E_\pi[f(X)]$; the mathematical conditions ensure convergence of these averages.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Brownian Motion and Introduction to Stochastic Calculus}
+\label{sec:brownian}
+
+\subsection{Standard Brownian Motion}
+
+\begin{definition}[Standard Brownian motion]
+A process $(B_t)_{t\ge 0}$ is a \textbf{standard Brownian motion} if:
+\begin{enumerate}[label=(\roman*)]
+    \item $B_0=0$ almost surely.
+    \item $B_t$ has independent increments.
+    \item For $0\le s < t$, $B_t - B_s \sim N(0,t-s)$.
+    \item $B_t$ has continuous sample paths almost surely.
+\end{enumerate}
+\end{definition}
+
+Brownian motion is the canonical continuous-time Gaussian process with stationary independent increments. 
+It models continuous-time random noise and underlies diffusion processes, option pricing, and many physical phenomena.
+
+\subsection{Quadratic Variation}
+
+For a partition $\Pi_n = \{0=t_0 < t_1 < \cdots < t_n = t\}$, define
+\[
+V_t(\Pi_n) = \sum_{k=0}^{n-1} (B_{t_{k+1}} - B_{t_k})^2.
+\]
+As the mesh of the partition tends to 0, $V_t(\Pi_n)$ converges in probability to $t$. 
+We call $[B]_t = t$ the \textbf{quadratic variation} of Brownian motion.
+
+Quadratic variation captures the ``roughness'' of Brownian paths: unlike smooth functions, whose quadratic variation is zero, Brownian paths accumulate non-trivial variance along every interval.
+
+\subsection{It\^o Integral (Idea)}
+
+For an adapted process $(H_t)$ satisfying suitable integrability, the It\^o integral
+\[
+\int_0^t H_s\,dB_s
+\]
+is defined as an $L^2$-limit of stochastic Riemann sums
+\[
+\sum_{k} H_{t_k} (B_{t_{k+1}} - B_{t_k}).
+\]
+
+Key properties include:
+\begin{itemize}
+    \item Linearity in $H$.
+    \item Isometry: $E\left[ \left( \int_0^t H_s\,dB_s \right)^2 \right] = E\left[ \int_0^t H_s^2\,ds \right]$.
+\end{itemize}
+
+\subsection{It\^o's Formula}
+
+\begin{theorem}[It\^o's Formula, one dimension]
+Let $X_t$ solve
+\[
+dX_t = \mu(t,X_t)\,dt + \sigma(t,X_t)\,dB_t,
+\]
+and let $f(t,x)$ be $C^{1,2}$ (once differentiable in $t$, twice in $x$). 
+Then
+\[
+df(t,X_t)
+= \left( f_t(t,X_t) + \mu(t,X_t) f_x(t,X_t)
++ \frac{1}{2}\sigma^2(t,X_t) f_{xx}(t,X_t) \right) dt
++ \sigma(t,X_t) f_x(t,X_t)\,dB_t.
+\]
+\end{theorem}
+
+This is the stochastic chain rule: extra term $\tfrac{1}{2}\sigma^2 f_{xx}$ arises from quadratic variation. 
+In quantitative finance, applying It\^o's formula to option prices leads to PDEs like Black--Scholes.
+
+\begin{example}[Geometric Brownian motion]
+Consider the SDE
+\[
+dS_t = \mu S_t\,dt + \sigma S_t\,dB_t,
+\]
+with $S_0>0$. 
+Let $f(x) = \log x$, so $f'(x) = 1/x$, $f''(x) = -1/x^2$. 
+Applying It\^o to $f(S_t)$ gives
+\[
+d\log S_t
+= \left(\mu - \frac{1}{2}\sigma^2\right) dt + \sigma\,dB_t.
+\]
+Integrating yields
+\[
+S_t = S_0\exp\left(\Big(\mu-\frac{1}{2}\sigma^2\Big)t + \sigma B_t\right).
+\]
+Thus geometric Brownian motion has log-normal marginals; this is the classical continuous-time model for asset prices in Black--Scholes.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Decision Theory and Risk in Statistical Inference}
+\label{sec:decision}
+
+\subsection{Decision Functions and Risk}
+
+In mathematical statistics, an estimator is viewed as a decision rule under uncertainty.
+
+\begin{definition}[Decision rule and loss]
+Let $\Theta$ be the parameter space and $\mathcal{A}$ an action space. 
+A \textbf{decision rule} $\delta$ maps the sample space to actions.
+A \textbf{loss function} $L(\theta,a)$ quantifies the cost of taking action $a$ when the true parameter is $\theta$.
+\end{definition}
+
+\begin{definition}[Risk function]
+The \textbf{risk} of a decision rule $\delta$ at $\theta$ is
+\[
+R(\theta,\delta) = E_\theta[L(\theta,\delta(X))],
+\]
+the expected loss under data generated from $\theta$.
+\end{definition}
+
+\subsection{Admissibility and Minimaxity}
+
+A rule $\delta_1$ \emph{dominates} $\delta_2$ if $R(\theta,\delta_1) \le R(\theta,\delta_2)$ for all $\theta$, with strict inequality for some $\theta$. 
+A rule is \textbf{admissible} if no other rule dominates it.
+
+\begin{definition}[Minimax rule]
+A rule $\delta^*$ is \textbf{minimax} if it minimizes the maximum risk:
+\[
+\sup_{\theta} R(\theta,\delta^*)
+= \inf_{\delta} \sup_\theta R(\theta,\delta).
+\]
+\end{definition}
+
+Minimax rules are conservative: they are optimal under worst-case parameter choices.
+
+\subsection{Bayes Rules}
+
+Given a prior $\pi$ on $\Theta$, the \textbf{Bayes risk} of $\delta$ is
+\[
+r(\pi,\delta)
+= \int R(\theta,\delta)\,\pi(d\theta).
+\]
+
+A \textbf{Bayes rule} $\delta_\pi$ minimizes $r(\pi,\delta)$ over all $\delta$. 
+Under regularity, Bayes rules are often admissible and have appealing decision-theoretic properties.
+
+\begin{example}[Quadratic loss and posterior mean]
+For estimating a scalar $\theta$ with squared error loss $L(\theta,a)=(\theta-a)^2$, the Bayes rule is the posterior mean $E[\theta\mid X]$. 
+Indeed, for any posterior distribution, the value $a$ minimizing $E[(\theta-a)^2 \mid X]$ is $a=E[\theta\mid X]$, an elementary calculus fact.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Sufficiency, Completeness, and UMVU Estimation}
+
+\subsection{Sufficiency and Minimal Sufficiency}
+
+We recall sufficiency:
+
+\begin{definition}[Sufficient statistic]
+A statistic $T(X)$ is \textbf{sufficient} for $\theta$ if the conditional distribution of $X$ given $T(X)$ does not depend on $\theta$.
+\end{definition}
+
+\begin{definition}[Minimal sufficient]
+A sufficient statistic $T$ is \textbf{minimal sufficient} if it is a function of any other sufficient statistic: if $S$ is sufficient, then there exists $h$ such that $T=h(S)$ almost surely.
+\end{definition}
+
+In exponential families, certain natural statistics (like sums, sums of squares) are minimal sufficient.
+
+\subsection{Completeness and Lehmann--Scheff\'e}
+
+\begin{definition}[Complete statistic]
+A statistic $T$ is \textbf{complete} for a family $\{P_\theta\}$ if for any measurable function $g$,
+\[
+E_\theta[g(T)] = 0 \text{ for all } \theta
+\quad\Rightarrow\quad
+P_\theta(g(T)=0)=1 \text{ for all } \theta.
+\]
+\end{definition}
+
+\begin{theorem}[Lehmann--Scheff\'e]
+If $T$ is a complete sufficient statistic for $\theta$, and $\hat{\phi}(T)$ is an unbiased estimator of $\phi(\theta)$, then $\hat{\phi}(T)$ is the unique uniformly minimum variance unbiased (UMVU) estimator of $\phi(\theta)$.
+\end{theorem}
+
+\begin{example}[Normal mean with known variance]
+Let $X_1,\dots,X_n \sim N(\mu,\sigma^2)$ with known $\sigma^2$. 
+The sample mean $\bar{X}$ is sufficient and complete for $\mu$ in this exponential family. 
+Any unbiased estimator of $\mu$ that is a function of $\bar{X}$ must be $\bar{X}$ itself. 
+Hence $\bar{X}$ is UMVU for $\mu$.
+
+\end{example}
+
+\subsection{Rao--Blackwell Theorem}
+
+\begin{theorem}[Rao--Blackwell]
+Let $T$ be sufficient for $\theta$ and let $\delta(X)$ be any estimator of $\phi(\theta)$ with finite risk under squared loss. 
+Define the improved estimator
+\[
+\delta^*(X) = E_\theta[\delta(X) \mid T].
+\]
+Then $R(\theta,\delta^*) \le R(\theta,\delta)$ for all $\theta$. 
+If $T$ is complete and $\delta$ is unbiased, then $\delta^*$ is UMVU.
+\end{theorem}
+
+Intuitively, conditioning on $T$ discards irrelevant noise while retaining all information about $\theta$, reducing variance without introducing bias.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Information Inequalities and Cram\'er--Rao Bounds}
+
+\subsection{Fisher Information}
+
+For a parametric family $\{f(x;\theta)\}$ (dominated by a common measure), the \textbf{score} is
+\[
+U_\theta(X) = \frac{\partial}{\partial\theta}\log f(X;\theta),
+\]
+assuming differentiability under the integral sign.
+
+\begin{definition}[Fisher information]
+The \textbf{Fisher information} in one observation is
+\[
+I(\theta) = E_\theta[U_\theta(X)^2]
+= -E_\theta\left[\frac{\partial^2}{\partial\theta^2}\log f(X;\theta)\right],
+\]
+when the interchange of derivative and expectation is valid.
+\end{definition}
+
+For i.i.d.\ $X_1,\dots,X_n$, the information in the sample is $n I(\theta)$.
+
+\subsection{Cram\'er--Rao Inequality}
+
+\begin{theorem}[Cram\'er--Rao lower bound]
+Let $T(X)$ be an unbiased estimator of $\phi(\theta)$ with finite variance. 
+Under regularity conditions,
+\[
+\operatorname{Var}_\theta(T)
+\ge \frac{(\phi'(\theta))^2}{I(\theta)}.
+\]
+For i.i.d.\ samples, replace $I(\theta)$ by $nI(\theta)$.
+\end{theorem}
+
+This provides a lower bound on the variance of any unbiased estimator; estimators attaining the bound (for all $\theta$) are called \emph{efficient}.
+
+\begin{example}[Normal mean]
+Let $X_1,\dots,X_n \sim N(\mu,\sigma^2)$ with known $\sigma^2$, and consider estimating $\phi(\mu)=\mu$. 
+The log-likelihood for one observation is
+\[
+\log f(x;\mu) = -\frac{1}{2}\log(2\pi\sigma^2) - \frac{(x-\mu)^2}{2\sigma^2},
+\]
+so
+\[
+U_\mu(X) = \frac{\partial}{\partial\mu}\log f(X;\mu)
+= \frac{X-\mu}{\sigma^2},
+\]
+implying $I(\mu) = 1/\sigma^2$. 
+For $n$ observations, $I_n(\mu) = n/\sigma^2$, so the CRLB for any unbiased estimator $T$ of $\mu$ is
+\[
+\operatorname{Var}(T) \ge \frac{1}{I_n(\mu)} = \frac{\sigma^2}{n}.
+\]
+The sample mean $\bar{X}$ achieves this bound, so it is efficient.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Asymptotic Likelihood Theory}
+\label{sec:likelihood-asymptotics}
+
+\subsection{Consistency and Asymptotic Normality of MLEs}
+
+Under standard regularity conditions (identifiability, differentiability, integrability, etc.), the maximum likelihood estimator $\hat{\theta}_n$ of a scalar parameter $\theta_0$ is consistent and asymptotically normal:
+\[
+\hat{\theta}_n \xrightarrow{P} \theta_0,
+\]
+\[
+\sqrt{n}(\hat{\theta}_n - \theta_0)
+\Rightarrow N\left(0,\,\frac{1}{I(\theta_0)}\right),
+\]
+where $I(\theta_0)$ is the Fisher information for one observation.
+
+In vector form, if $\theta\in\mathbb{R}^p$, then
+\[
+\sqrt{n}(\hat{\theta}_n - \theta_0)
+\Rightarrow N_p\left(\bm{0},\, I(\theta_0)^{-1}\right),
+\]
+with $I(\theta_0)$ now the Fisher information matrix.
+
+\subsection{Likelihood Ratio, Score, and Wald Tests}
+
+For testing $H_0:\theta=\theta_0$ vs.\ $H_1:\theta\ne\theta_0$, three asymptotically equivalent test statistics are:
+
+\begin{itemize}
+    \item \textbf{Likelihood ratio test} (LRT):
+    \[
+    \Lambda = \frac{L(\theta_0)}{L(\hat{\theta}_n)},\quad
+    -2\log\Lambda
+    \overset{H_0}{\Rightarrow} \chi^2_1.
+    \]
+    \item \textbf{Score test}:
+    \[
+    S = \frac{U_n(\theta_0)^2}{I_n(\theta_0)}
+    \overset{H_0}{\Rightarrow} \chi^2_1,
+    \]
+    where $U_n(\theta)=\partial \ell_n(\theta)/\partial\theta$ is the sample score.
+    \item \textbf{Wald test}:
+    \[
+    W = n\frac{(\hat{\theta}_n - \theta_0)^2}{\hat{V}_n}
+    \overset{H_0}{\Rightarrow} \chi^2_1,
+    \]
+    where $\hat{V}_n$ is a consistent estimator of $\operatorname{Var}(\hat{\theta}_n)$.
+\end{itemize}
+
+These statistics all asymptotically follow the same chi-square distribution under $H_0$, though their finite-sample behavior and implementation details differ.
+
+\begin{example}[Logistic regression coefficient test]
+In logistic regression, suppose we test whether a particular coefficient $\beta_j$ equals zero. 
+The Wald test uses $\hat{\beta}_j$ and its estimated standard error; the score test uses the derivative of the log-likelihood at $\beta_j=0$; the LRT compares maximized log-likelihoods with and without the predictor. 
+Asymptotically, all three tests have size $\alpha$ and similar power properties, but in small samples they can behave differently.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Bayesian Asymptotics and Bernstein--von Mises}
+
+\subsection{Posterior Concentration}
+
+Under regularity, Bayesian posteriors tend to concentrate around the true parameter as $n\to\infty$. 
+In many models, the posterior variance shrinks at rate $1/n$ and the posterior mean is consistent for the true parameter.
+
+\subsection{Bernstein--von Mises Theorem (Informal)}
+
+Roughly, in regular parametric models with prior density $\pi(\theta)$ that is positive and continuous near the true parameter $\theta_0$, the posterior distribution of $\theta$ is asymptotically normal:
+\[
+\pi(\theta \mid X_1,\dots,X_n)
+\approx N\left(\hat{\theta}_n,\, [n I(\theta_0)]^{-1}\right),
+\]
+where $\hat{\theta}_n$ is the MLE. 
+More precisely, the posterior and the normal approximation are close in total variation.
+
+This means that, asymptotically, Bayesian credible intervals and frequentist confidence intervals coincide in regular problems.
+
+\begin{example}[Normal mean with conjugate prior]
+Let $X_i\sim N(\mu,\sigma^2)$ with known $\sigma^2$, prior $\mu \sim N(\mu_0,\tau^2)$. 
+The posterior is
+\[
+\mu \mid X_1,\dots,X_n \sim
+N\left(
+\frac{\mu_0/\tau^2 + n\bar{X}/\sigma^2}{1/\tau^2 + n/\sigma^2},
+\ \frac{1}{1/\tau^2 + n/\sigma^2}
+\right).
+\]
+As $n\to\infty$, the posterior mean approaches $\bar{X}$ and the posterior variance approaches $\sigma^2/n$, matching the frequentist asymptotic distribution of $\bar{X}$. 
+This is a concrete illustration of Bernstein--von Mises in a simple setting.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Concentration Inequalities and Large Deviations}
+\label{sec:concentration}
+
+\subsection{Hoeffding's Inequality}
+
+\begin{theorem}[Hoeffding]
+Let $X_1,\dots,X_n$ be independent with $a_i \le X_i \le b_i$ almost surely and $E[X_i]=\mu_i$. 
+Then for $S_n = \sum_{i=1}^n X_i$ and any $t>0$,
+\[
+P(S_n - E[S_n] \ge t)
+\le \exp\left(-\frac{2t^2}{\sum_{i=1}^n (b_i-a_i)^2}\right).
+\]
+\end{theorem}
+
+This inequality shows that the sum of bounded independent variables is sharply concentrated around its mean, with exponential tails. 
+Such results are fundamental in learning theory, empirical process theory, and high-dimensional statistics.[web:65]
+
+\subsection{Chernoff Bounds}
+
+Chernoff bounds use moment generating functions to produce exponential tail bounds. 
+If $X_1,\dots,X_n$ are i.i.d.\ Bernoulli$(p)$, $S_n = \sum X_i$, and $\varepsilon>0$, then
+\[
+P\left(\frac{S_n}{n} \ge p + \varepsilon\right)
+\le \exp(-n D(p+\varepsilon \,\|\, p)),
+\]
+where $D(q\|p)$ is the Kullback--Leibler divergence between Bernoulli$(q)$ and Bernoulli$(p)$.
+
+\subsection{Cram\'er’s Theorem (Large Deviations for Sums)}
+
+Cram\'er's theorem provides a full large deviations principle for normalized sums of i.i.d.\ random variables: for $S_n=\sum_{i=1}^n X_i$, the probabilities
+\[
+P\left(\frac{S_n}{n} \in A\right)
+\]
+decay like $\exp(-n \inf_{x\in A} I(x))$, where $I$ is the \emph{rate function} given by the Legendre transform of the log moment generating function:
+\[
+I(x) = \sup_{t\in\mathbb{R}} \{tx - \Lambda(t)\},
+\quad \Lambda(t) = \log E[e^{tX_1}].
+\]
+
+This is much sharper than the CLT: it describes the exponential decay of large deviations from the mean.
+
+\begin{example}[Rare-event probabilities for sample mean]
+If $X_i$ are daily P\&L shocks with light tails, Cram\'er's theorem can approximate probabilities that the average return over $n$ days exceeds a stressed level. 
+The rate function $I(x)$ quantifies how exponentially rare such events are in the i.i.d.\ model, and is central to risk measures like value-at-risk and expected shortfall in large portfolios.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Hints of High-Dimensional Statistics}
+\label{sec:high-dim}
+
+\subsection{Curse of Dimensionality and Sparsity}
+
+In high dimensions ($p$ comparable to or larger than $n$), classical asymptotics ($n\to\infty$ with fixed $p$) break down. 
+Covariance matrices become singular, and many estimators are not well-defined without additional structure.
+
+A common structural assumption is \textbf{sparsity}: only a small subset of parameters (e.g.\ regression coefficients) are non-zero. 
+Regularization methods exploit this to recover signal from limited data.
+
+\subsection{Penalized Estimation (Lasso Idea)}
+
+In linear regression $\bm{y}=X\bm{\beta} + \bm{\varepsilon}$, the Lasso estimator solves
+\[
+\hat{\bm{\beta}}^{\text{lasso}}
+= \arg\min_{\bm{\beta}}
+\left\{
+\frac{1}{2n}\|\bm{y}-X\bm{\beta}\|_2^2
++ \lambda \|\bm{\beta}\|_1
+\right\}.
+\]
+
+The $\ell_1$ penalty $\|\bm{\beta}\|_1$ encourages many coefficients to be exactly zero, yielding sparse solutions. 
+Concentration inequalities and empirical process theory underpin consistency and oracle inequalities for such estimators in high dimensions.[web:65][web:58]
+
+\subsection{Concentration of Measure}
+
+In high dimensions, Lipschitz functions of many independent variables are often tightly concentrated around their mean or median. 
+Results like McDiarmid's inequality and Gaussian concentration show that deviations of order larger than $\sqrt{n}$ are extremely unlikely.
+
+\begin{example}[Norm of a high-dimensional Gaussian vector]
+If $\bm{Z}\sim N_d(\bm{0},I_d)$, then $\|\bm{Z}\|_2^2$ is $\chi^2_d$-distributed with mean $d$ and variance $2d$. 
+Thus $\|\bm{Z}\|_2$ is concentrated around $\sqrt{d}$. 
+For large $d$, the relative fluctuations shrink:
+\[
+\frac{\|\bm{Z}\|_2}{\sqrt{d}} \xrightarrow{P} 1.
+\]
+This concentration is fundamental in random matrix theory and high-dimensional geometry, and has strong implications for statistical algorithms in large-$p$ settings.
+
+\end{example}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Where to Go Next}
+
+This advanced course has covered:
+\begin{itemize}
+    \item Measure-theoretic probability: probability spaces, random variables as measurable maps, Lebesgue integration.
+    \item Convergence modes, Borel--Cantelli lemmas, zero--one laws, strong laws, CLTs, and the law of the iterated logarithm.
+    \item Conditional expectation as projection, martingales, optional stopping, and convergence theorems.
+    \item Discrete-time Markov chains, ergodicity, and continuous-time Brownian motion with a glimpse of stochastic calculus.
+    \item Decision-theoretic statistics: risk, Bayes and minimax rules; sufficiency, completeness, UMVU, and information inequalities.
+    \item Asymptotic likelihood theory, Bayesian asymptotics, concentration inequalities, large deviations, and a taste of high-dimensional methods.
+\end{itemize}
+
+Natural next steps include:
+\begin{itemize}
+    \item Full courses in stochastic calculus and stochastic differential equations, with applications to finance and control.
+    \item Advanced mathematical statistics: empirical processes, semiparametric theory, nonparametric Bayes.
+    \item High-dimensional probability and random matrix theory.
+    \item Specialized topics: time series (ARMA, GARCH), survival analysis, spatial statistics, causal inference, and modern machine learning theory.
+\end{itemize}
+
+Graduate syllabi in advanced probability and mathematical statistics list these directions as core components of a deeper study path.[web:62][web:65][web:66][web:70][web:72]
+
+\end{document}

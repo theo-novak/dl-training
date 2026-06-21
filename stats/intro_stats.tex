@@ -1,0 +1,1013 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    pdftitle={Introduction to Probability and Statistics},
+    pdfauthor={Your Name}
+}
+
+\title{An Introduction to Probability and Statistics\\[0.5em]
+       \large A Beginner-Friendly Course with Examples and Intuition}
+\author{Theodosios Dimitrasopoulos\footnote{Email: theodosios.novak@gmail.com}}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{How to Use This Course}
+
+This document is designed as a self-contained introduction to probability and statistics for beginners with basic algebra and some familiarity with functions. 
+It roughly follows the content and depth of entry-level university courses on probability and statistics.\footnote{The topic coverage is similar to introductory courses such as MIT 18.05, Georgia Tech's ``Introduction to Probability and Statistics'', and common general-education statistics courses.[web:13][web:19][web:20]}
+
+Each section introduces concepts, states definitions and formulas, and then immediately illustrates them with worked examples and explanations of \emph{what the equations mean}. 
+You can read sequentially, or jump to specific sections when revising.
+
+Throughout, we use:
+\begin{itemize}
+    \item Uppercase letters like \(X, Y\) for random variables.
+    \item Lowercase letters like \(x, y\) for realizations (specific values).
+    \item \(P(\cdot)\) for probability and \(E[\cdot]\) for expectation.
+\end{itemize}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Foundations: Sets, Events, and Notation}
+
+\subsection{Sets and Events}
+
+Probability is built on \emph{sets} of outcomes. 
+A \textbf{set} is a collection of objects, typically outcomes of an experiment.
+
+\begin{itemize}
+    \item The \textbf{sample space} \(\Omega\) is the set of all possible outcomes of a random experiment.
+    \item An \textbf{event} is a subset \(A \subseteq \Omega\) of outcomes for which something of interest happens.
+\end{itemize}
+
+\textbf{Example (Tossing a coin once).}  
+The sample space is
+\[
+\Omega = \{\text{H}, \text{T}\},
+\]
+where H = ``heads'', T = ``tails''.  
+The event ``we get heads'' is the subset
+\[
+A = \{\text{H}\} \subseteq \Omega.
+\]
+The event ``we get tails'' is \(B = \{\text{T}\}\).  
+The probability model will later assign numbers like \(P(A) = 0.5\), meaning we expect heads half the time.
+
+\subsection{Set Operations}
+
+Given events \(A\) and \(B\) (subsets of \(\Omega\)), we use standard set operations:
+
+\begin{itemize}
+    \item Union: \(A \cup B\) = event ``\(A\) occurs OR \(B\) occurs (or both)''.
+    \item Intersection: \(A \cap B\) = event ``\(A\) AND \(B\) occur simultaneously''.
+    \item Complement: \(A^c\) = ``\(A\) does not occur''.
+\end{itemize}
+
+\textbf{Example (Die roll).}  
+Let the experiment be rolling a fair six-sided die. Then
+\[
+\Omega = \{1,2,3,4,5,6\}.
+\]
+Define:
+\[
+A = \{\text{even outcomes}\} = \{2,4,6\},
+\]
+\[
+B = \{\text{outcome} > 3\} = \{4,5,6\}.
+\]
+Then
+\[
+A \cup B = \{2,4,5,6\},
+\]
+\[
+A \cap B = \{4,6\},
+\]
+\[
+A^c = \{1,3,5\}.
+\]
+These sets simply collect outcomes that match the verbal descriptions; later we quantify ``how likely'' each set is.
+
+\subsection{Sigma-Algebras (Optional Intuition)}
+
+Purely for intuition: in rigorous probability, we define a collection \(\mathcal{F}\) of subsets of \(\Omega\) that are allowed events.  
+This collection is called a \textbf{sigma-algebra}, and it is closed under complements and countable unions.  
+For most finite or countable examples in this course, you can think of ``all subsets'' as allowed events.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Descriptive Statistics: Summarizing Data}
+
+Probability is about modeling uncertainty, while statistics is about learning from data. 
+Descriptive statistics give us quick numerical and visual summaries of a dataset.\,[web:18][web:24][web:26]
+
+\subsection{Types of Data}
+
+\begin{itemize}
+    \item \textbf{Categorical data}: labels or categories (e.g., gender, color, yes/no).
+    \item \textbf{Quantitative data}: numeric values where arithmetic makes sense (e.g., heights, returns).
+\end{itemize}
+
+\textbf{Example.}  
+Imagine we collect the daily return (in percent) of a stock for 5 days:
+\[
+-1.2,\quad 0.5,\quad 1.8,\quad -0.3,\quad 0.7.
+\]
+These are quantitative data.  
+If we instead record ``up'' or ``down'' each day, we get categorical data like: up, up, down, up, down.
+
+\subsection{Measures of Central Tendency}
+
+The \textbf{sample mean} of observations \(x_1,\dots,x_n\) is
+\[
+\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i.
+\]
+This formula says: add all observations, divide by how many there are.  
+It represents the ``center of mass'' of the data and is heavily influenced by large values.
+
+\textbf{Example.}  
+For data \(x = (2, 3, 5, 10)\),
+\[
+\bar{x} = \frac{2 + 3 + 5 + 10}{4} = \frac{20}{4} = 5.
+\]
+On average, the value is 5.  
+If we change 10 to 100, the mean becomes
+\[
+\bar{x}' = \frac{2 + 3 + 5 + 100}{4} = \frac{110}{4} = 27.5,
+\]
+showing how a single large outlier can drag the mean upward.
+
+The \textbf{median} is the ``middle'' value when data are sorted. 
+For odd \(n\), it is the central observation; for even \(n\), it is usually the average of the two central observations.
+
+\textbf{Example.}  
+For data \(1, 3, 4\), the median is 3.  
+For data \(1, 3, 4, 100\), the median is the average of 3 and 4, i.e.,
+\[
+\text{median} = \frac{3+4}{2} = 3.5.
+\]
+Notice how the median is much less affected by the extreme value 100 than the mean was.
+
+\subsection{Measures of Spread}
+
+The \textbf{sample variance} is
+\[
+s^2 = \frac{1}{n-1}\sum_{i=1}^{n} (x_i - \bar{x})^2.
+\]
+The term \((x_i - \bar{x})^2\) measures how far each data point is from the mean.  
+We average these squared deviations (with a factor \(1/(n-1)\) for technical reasons related to unbiasedness).
+
+The \textbf{sample standard deviation} is
+\[
+s = \sqrt{s^2}.
+\]
+It is in the same units as the data and gives a typical size of deviations from the mean.
+
+\textbf{Example.}  
+For data \(2, 3, 5, 10\), we found \(\bar{x} = 5\).  
+Compute the squared deviations:
+\[
+(2-5)^2 = 9,\quad (3-5)^2 = 4,\quad (5-5)^2 = 0,\quad (10-5)^2 = 25.
+\]
+Sum them:
+\[
+\sum_{i=1}^{4} (x_i - \bar{x})^2 = 9 + 4 + 0 + 25 = 38.
+\]
+Then
+\[
+s^2 = \frac{38}{4-1} = \frac{38}{3} \approx 12.67,\qquad
+s \approx \sqrt{12.67} \approx 3.56.
+\]
+So typical deviations from the mean of 5 are around 3.6 units.
+
+\subsection{Z-Scores}
+
+A \textbf{z-score} for an observation \(x\) is
+\[
+z = \frac{x - \bar{x}}{s}.
+\]
+This tells you how many standard deviations above or below the mean an observation lies.  
+A value \(z = 2\) means the observation is two standard deviations above the mean, which is relatively unusual in many distributions.
+
+\textbf{Example.}  
+In the previous dataset, \(\bar{x} = 5\) and \(s \approx 3.56\).  
+For observation \(x = 10\),
+\[
+z = \frac{10 - 5}{3.56} \approx 1.40.
+\]
+So 10 is about \(1.4\) standard deviations above the mean; big, but not extremely so.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Probability: Axioms and Basic Rules}
+
+\subsection{Probability Space and Axioms}
+
+A \textbf{probability space} consists of:
+\begin{itemize}
+    \item Sample space \(\Omega\).
+    \item Sigma-algebra \(\mathcal{F}\) of events.
+    \item Probability measure \(P\) that assigns each event \(A \in \mathcal{F}\) a number \(P(A)\) in \([0,1]\).
+\end{itemize}
+
+The probability measure \(P\) satisfies three core axioms:
+\begin{enumerate}
+    \item Non-negativity: \(P(A) \ge 0\) for all events \(A\).
+    \item Normalization: \(P(\Omega) = 1\).
+    \item Countable additivity: If \(A_1, A_2, \dots\) are disjoint events, then
+    \[
+    P\Big(\bigcup_{i=1}^{\infty} A_i\Big) = \sum_{i=1}^{\infty} P(A_i).
+    \]
+\end{enumerate}
+
+These axioms formalize the idea that probabilities are non-negative, total probability is 1, and probabilities of mutually exclusive scenarios add up correctly.
+
+\subsection{Equally Likely Outcomes}
+
+When the sample space is finite and all outcomes are equally likely,
+\[
+P(A) = \frac{\text{number of outcomes in } A}{\text{number of outcomes in } \Omega}.
+\]
+
+\textbf{Example (Fair die).}  
+Let \(\Omega = \{1,2,3,4,5,6\}\), and assume each face is equally likely.  
+Then
+\[
+P(\{k\}) = \frac{1}{6},\quad k=1,\dots,6.
+\]
+The event ``roll an even number'' is \(A=\{2,4,6\}\), so
+\[
+P(A) = \frac{3}{6} = \frac{1}{2}.
+\]
+This matches the intuitive statement: half of the faces are even.
+
+\subsection{Basic Probability Rules}
+
+From the axioms we can derive basic rules.
+
+\paragraph{Complement Rule.}
+For any event \(A\),
+\[
+P(A^c) = 1 - P(A).
+\]
+This says that the chance something does \emph{not} happen is one minus the chance it does happen.
+
+\textbf{Example.}  
+If the probability of rain tomorrow is \(0.3\), then the probability it does not rain is
+\[
+P(\text{no rain}) = 1 - 0.3 = 0.7.
+\]
+
+\paragraph{Addition Rule.}
+For any two events \(A\) and \(B\),
+\[
+P(A \cup B) = P(A) + P(B) - P(A \cap B).
+\]
+We add the probabilities of \(A\) and \(B\) but subtract the overlap \(P(A \cap B)\) because it was counted twice.
+
+\textbf{Example.}  
+In a class, let:
+\begin{itemize}
+    \item \(A\): student plays football, \(P(A)=0.4\).
+    \item \(B\): student plays basketball, \(P(B)=0.3\).
+    \item \(P(A \cap B)=0.1\).
+\end{itemize}
+Then probability a random student plays football or basketball (or both) is
+\[
+P(A \cup B) = 0.4 + 0.3 - 0.1 = 0.6.
+\]
+So 60\% of students play at least one of the two sports.
+
+\subsection{Conditional Probability and Independence}
+
+The \textbf{conditional probability} of \(A\) given \(B\) (with \(P(B)>0\)) is defined as
+\[
+P(A \mid B) = \frac{P(A \cap B)}{P(B)}.
+\]
+This answers: ``given that \(B\) happened, what is the chance that \(A\) also happened?''
+
+\textbf{Example.}  
+Suppose in a firm:
+\begin{itemize}
+    \item 40\% of employees are in IT: \(P(\text{IT}) = 0.4\).
+    \item 20\% are IT and have a PhD: \(P(\text{IT and PhD}) = 0.2\).
+\end{itemize}
+Then the probability an employee has a PhD given they are in IT is
+\[
+P(\text{PhD} \mid \text{IT}) = \frac{P(\text{IT and PhD})}{P(\text{IT})}
+= \frac{0.2}{0.4} = 0.5.
+\]
+So half of IT employees have a PhD.
+
+Two events \(A\) and \(B\) are \textbf{independent} if
+\[
+P(A \cap B) = P(A)\,P(B).
+\]
+Equivalently, \(P(A \mid B) = P(A)\) (when \(P(B)>0\)); knowing that \(B\) happens does not change the probability of \(A\).
+
+\textbf{Example.}  
+Toss a fair coin and roll a fair die.  
+Let \(A=\{\text{coin shows heads}\}\), \(B=\{\text{die shows 6}\}\).  
+Intuitively the coin result does not affect the die, so
+\[
+P(A) = 0.5,\quad P(B) = \frac{1}{6},\quad
+P(A \cap B) = \frac{1}{12} = 0.5 \times \frac{1}{6}.
+\]
+Thus \(A\) and \(B\) are independent.
+
+\subsection{Bayes' Theorem}
+
+Bayes' theorem relates the posterior probability \(P(A \mid B)\) to the likelihood \(P(B \mid A)\) and the prior \(P(A)\):
+\[
+P(A \mid B) = \frac{P(B \mid A) P(A)}{P(B)}.
+\]
+It shows how to update beliefs \(P(A)\) after observing evidence \(B\).
+
+\textbf{Example (Medical test).}  
+Suppose:
+\begin{itemize}
+    \item Disease prevalence: \(P(D) = 0.01\).
+    \item Test sensitivity: \(P(\text{positive} \mid D) = 0.99\).
+    \item Test false positive rate: \(P(\text{positive} \mid D^c) = 0.05\).
+\end{itemize}
+We want \(P(D \mid \text{positive})\): the probability a person has the disease given a positive result.
+
+First compute
+\[
+P(\text{positive}) = P(\text{positive} \mid D) P(D) +
+P(\text{positive} \mid D^c) P(D^c)
+= 0.99 \cdot 0.01 + 0.05 \cdot 0.99
+= 0.0099 + 0.0495 = 0.0594.
+\]
+Then
+\[
+P(D \mid \text{positive}) =
+\frac{0.99 \cdot 0.01}{0.0594} \approx 0.1667.
+\]
+So despite a positive test, the chance of actually having the disease is only around 16.7\%, mainly because the disease is rare and the false positive rate is not negligible.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Counting Techniques}
+
+Counting techniques help compute probabilities in models with equally likely outcomes.\,[web:19]
+
+\subsection{Multiplication Principle}
+
+If a process has \(n_1\) options for the first step, \(n_2\) options for the second, and so on, then the total number of outcomes is
+\[
+n_1 \times n_2 \times \cdots \times n_k.
+\]
+
+\textbf{Example.}  
+You choose a 3-character password: the first character is a digit 0--9 (10 choices), the next two are lowercase letters a--z (26 choices each).  
+Total passwords:
+\[
+10 \times 26 \times 26 = 6760.
+\]
+
+\subsection{Permutations}
+
+A \textbf{permutation} is an ordered arrangement of objects.  
+The number of permutations of \(n\) distinct objects taken \(k\) at a time is
+\[
+P(n,k) = n (n-1) \cdots (n-k+1) = \frac{n!}{(n-k)!}.
+\]
+
+\textbf{Example.}  
+How many ways can we assign gold, silver, bronze medals among 10 runners?  
+Order matters (gold vs. silver is different), and we choose 3 people from 10:
+\[
+P(10,3) = \frac{10!}{(10-3)!} = \frac{10!}{7!} = 10 \cdot 9 \cdot 8 = 720.
+\]
+
+\subsection{Combinations}
+
+A \textbf{combination} is a selection of objects where order does not matter.  
+The number of combinations of \(n\) distinct objects taken \(k\) at a time is
+\[
+\binom{n}{k} = \frac{n!}{k!(n-k)!}.
+\]
+
+\textbf{Example.}  
+How many 6-card hands can be dealt from a standard 52-card deck?  
+Here order does not matter, so
+\[
+\binom{52}{6} = \frac{52!}{6! \, 46!}.
+\]
+This is the count of different sets of 6 cards you can receive.
+
+\subsection{Counting and Probability}
+
+If all outcomes in a finite sample space are equally likely, and event \(A\) contains \(M\) outcomes, then
+\[
+P(A) = \frac{M}{N},
+\]
+where \(N\) is the total number of outcomes.
+
+\textbf{Example (Poker-type event).}  
+You draw 6 cards from a 52-card deck.  
+What is the probability that all 6 are hearts?  
+Total outcomes: \(\binom{52}{6}\).  
+Favorable outcomes: choose 6 from the 13 hearts: \(\binom{13}{6}\).  
+Thus
+\[
+P(\text{6 hearts}) = \frac{\binom{13}{6}}{\binom{52}{6}}.
+\]
+This fraction is small, reflecting that such a hand is very rare.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discrete Random Variables and Distributions}
+
+\subsection{Random Variables}
+
+A \textbf{random variable} \(X\) is a function from the sample space \(\Omega\) to the real numbers \(\mathbb{R}\).  
+It assigns each outcome a numeric value.
+
+\textbf{Example.}  
+Toss a fair coin three times.  
+Let \(X\) be the number of heads.  
+Each outcome sequence (like HHT) is mapped to a number (here 2).  
+We say \(X\) is a discrete random variable because it only takes values in the set \(\{0,1,2,3\}\).
+
+\subsection{Probability Mass Function (PMF)}
+
+For a discrete random variable \(X\), the \textbf{probability mass function} (pmf) is
+\[
+p_X(x) = P(X = x).
+\]
+It must satisfy:
+\begin{itemize}
+    \item \(p_X(x) \ge 0\) for all \(x\).
+    \item \(\sum_{x} p_X(x) = 1\).
+\end{itemize}
+
+\textbf{Example (Number of heads in 3 fair tosses).}  
+We have \(X \in \{0,1,2,3\}\).  
+By counting (or using the binomial model later), we get
+\[
+p_X(0) = \frac{1}{8},\quad
+p_X(1) = \frac{3}{8},\quad
+p_X(2) = \frac{3}{8},\quad
+p_X(3) = \frac{1}{8}.
+\]
+These probabilities add up to 1, as required.
+
+\subsection{Bernoulli and Binomial Distributions}
+
+A \textbf{Bernoulli} random variable \(X\) takes values 1 (success) with probability \(p\) and 0 (failure) with probability \(1-p\):
+\[
+P(X=1) = p,\qquad P(X=0) = 1-p.
+\]
+
+\textbf{Example.}  
+A single coin toss with probability \(p=0.6\) of heads.  
+If we define \(X=1\) for heads, \(X=0\) for tails, then
+\[
+P(X=1) = 0.6,\qquad P(X=0) = 0.4.
+\]
+The Bernoulli distribution abstracts away from the physical coin and focuses on success/failure.
+
+The \textbf{binomial} distribution models the number of successes in \(n\) independent Bernoulli trials with success probability \(p\).  
+If \(X \sim \text{Binomial}(n,p)\), then
+\[
+P(X=k) = \binom{n}{k} p^k (1-p)^{n-k},\qquad k=0,1,\dots,n.
+\]
+The term \(\binom{n}{k}\) counts how many ways to choose which \(k\) trials are successes.
+
+\textbf{Example.}  
+Let \(X\) be the number of heads in 5 independent tosses of a coin with \(p=0.6\) of heads.  
+Then
+\[
+P(X=3) = \binom{5}{3} (0.6)^3 (0.4)^2
+= 10 \cdot 0.216 \cdot 0.16
+\approx 0.3456.
+\]
+So around 34.6\% of the time you will see exactly 3 heads.
+
+\subsection{Geometric and Poisson Distributions}
+
+The \textbf{geometric} distribution models the number of Bernoulli trials until the first success.  
+If \(X\) is the number of trials until the first success, with success probability \(p\) each trial, then
+\[
+P(X = k) = (1-p)^{k-1} p,\qquad k = 1,2,\dots.
+\]
+You fail \(k-1\) times, then succeed.
+
+\textbf{Example.}  
+Suppose each trade you attempt has probability \(p = 0.2\) of being executed successfully.  
+Let \(X\) be the number of attempts until the first success.  
+Then
+\[
+P(X=1) = 0.2,\quad
+P(X=2) = 0.8 \cdot 0.2 = 0.16,\quad
+P(X=3) = 0.8^2 \cdot 0.2 = 0.128,
+\]
+and so on.  
+It is more likely to succeed within the first few tries, and the tail decays geometrically.
+
+The \textbf{Poisson} distribution models the number of events in a fixed interval when events occur independently at a constant average rate \(\lambda\).  
+If \(X \sim \text{Poisson}(\lambda)\), then
+\[
+P(X = k) = \frac{e^{-\lambda} \lambda^{k}}{k!},\qquad k=0,1,2,\dots.
+\]
+
+\textbf{Example.}  
+If the average number of emails you receive per hour is \(\lambda=5\), and arrivals are roughly independent,  
+\[
+P(X=0) = e^{-5} \approx 0.0067 \quad (\text{no emails}),
+\]
+\[
+P(X=5) = \frac{e^{-5} 5^5}{5!} \approx 0.175.
+\]
+So seeing 5 emails in an hour is quite plausible.
+
+\subsection{Expectation and Variance (Discrete)}
+
+For a discrete random variable \(X\) with pmf \(p(x)\), the \textbf{expected value} (or mean) is
+\[
+E[X] = \sum_{x} x \, p(x).
+\]
+This is a weighted average of possible values, weighted by their probabilities.
+
+The \textbf{variance} is
+\[
+\operatorname{Var}(X) = E[(X - E[X])^2]
+= \sum_{x} (x - E[X])^2 p(x).
+\]
+It measures typical squared deviation from the mean.
+
+\textbf{Example (Binomial mean and variance).}  
+If \(X \sim \text{Binomial}(n,p)\), one can show that
+\[
+E[X] = np,\qquad \operatorname{Var}(X) = np(1-p).
+\]
+Intuitively, \(np\) is the expected number of successes in \(n\) trials.  
+The variance increases with both \(n\) and with the uncertainty \(p(1-p)\) of each individual trial.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Continuous Random Variables}
+
+\subsection{Probability Density Function (PDF)}
+
+A \textbf{continuous} random variable \(X\) has a \textbf{probability density function} (pdf) \(f_X(x)\) such that, for any interval \((a,b)\),
+\[
+P(a < X < b) = \int_{a}^{b} f_X(x)\,dx.
+\]
+The pdf must satisfy:
+\begin{itemize}
+    \item \(f_X(x) \ge 0\) for all \(x\).
+    \item \(\displaystyle \int_{-\infty}^{\infty} f_X(x)\,dx = 1\).
+\end{itemize}
+
+For continuous \(X\), the probability at a single point is zero:
+\[
+P(X = x_0) = 0.
+\]
+Only intervals have positive probability.
+
+\subsection{Uniform Distribution}
+
+A continuous random variable \(X\) is \textbf{uniform} on \([a,b]\), written \(X \sim \text{Uniform}(a,b)\), if
+\[
+f_X(x) =
+\begin{cases}
+\frac{1}{b-a}, & a \le x \le b,\\
+0, & \text{otherwise}.
+\end{cases}
+\]
+All points in \([a,b]\) are equally likely in terms of density.
+
+\textbf{Example.}  
+If \(X \sim \text{Uniform}(0,1)\), then
+\[
+P(0.2 < X < 0.5) = \int_{0.2}^{0.5} 1\,dx = 0.5 - 0.2 = 0.3.
+\]
+So the chance of landing in that subinterval is its length, 0.3.
+
+\subsection{Normal (Gaussian) Distribution}
+
+A random variable \(X\) is \textbf{normal} with mean \(\mu\) and variance \(\sigma^2\), written \(X \sim N(\mu, \sigma^2)\), if it has pdf
+\[
+f_X(x) = \frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\left(-\frac{(x - \mu)^2}{2\sigma^2}\right).
+\]
+The bell-shaped curve is centered at \(\mu\), and \(\sigma\) controls spread.
+
+\textbf{Key facts.}
+\begin{itemize}
+    \item \(E[X] = \mu\).
+    \item \(\operatorname{Var}(X) = \sigma^2\).
+\end{itemize}
+
+\textbf{Example (Standardization).}  
+If \(X \sim N(\mu,\sigma^2)\), then
+\[
+Z = \frac{X - \mu}{\sigma}
+\]
+has the \textbf{standard normal} distribution \(N(0,1)\).  
+We use this to compute probabilities using standard normal tables or software.
+
+\subsection{Exponential Distribution}
+
+The \textbf{exponential} distribution with rate \(\lambda>0\) has pdf
+\[
+f_X(x) =
+\begin{cases}
+\lambda e^{-\lambda x}, & x \ge 0,\\
+0, & x < 0.
+\end{cases}
+\]
+It models waiting times between events in a Poisson process.
+
+\textbf{Key facts.}
+\[
+E[X] = \frac{1}{\lambda},\qquad
+\operatorname{Var}(X) = \frac{1}{\lambda^2}.
+\]
+
+\textbf{Example.}  
+If phone calls arrive with an average rate of 3 per hour, the waiting time \(X\) between calls is approximately exponential with \(\lambda=3\).  
+Then the expected waiting time is
+\[
+E[X] = \frac{1}{3} \text{ hour} \approx 20 \text{ minutes}.
+\]
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Joint Distributions, Covariance, and Correlation}
+
+\subsection{Joint Distributions}
+
+For two discrete random variables \(X\) and \(Y\), the \textbf{joint pmf} is
+\[
+p_{X,Y}(x,y) = P(X=x, Y=y).
+\]
+For continuous variables, we use a joint pdf \(f_{X,Y}(x,y)\).
+
+The \textbf{marginal} distributions are obtained by summing (discrete) or integrating (continuous) over the other variable:
+\[
+p_X(x) = \sum_{y} p_{X,Y}(x,y),\qquad
+p_Y(y) = \sum_{x} p_{X,Y}(x,y).
+\]
+
+\textbf{Example.}  
+Suppose \(X\) is the number of daily trades you place (0,1,2), and \(Y\) is whether you end the day positive (1) or negative (0).  
+A joint pmf might look like:
+
+\begin{center}
+\begin{tabular}{c|ccc}
+\toprule
+\(Y \backslash X\) & 0 & 1 & 2 \\
+\midrule
+0 & 0.10 & 0.15 & 0.10 \\
+1 & 0.20 & 0.25 & 0.20 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+To find \(p_X(1)\),
+\[
+p_X(1) = p_{X,Y}(1,0) + p_{X,Y}(1,1) = 0.15 + 0.25 = 0.40.
+\]
+So 40\% of days you place exactly one trade.
+
+\subsection{Covariance}
+
+The \textbf{covariance} between \(X\) and \(Y\) is
+\[
+\operatorname{Cov}(X,Y) = E[(X - E[X])(Y - E[Y])].
+\]
+It measures whether \(X\) and \(Y\) tend to be simultaneously above or below their means.
+
+\begin{itemize}
+    \item If \(\operatorname{Cov}(X,Y) > 0\), they tend to move in the same direction.
+    \item If \(\operatorname{Cov}(X,Y) < 0\), they tend to move in opposite directions.
+    \item If \(\operatorname{Cov}(X,Y) = 0\), they are uncorrelated (but not necessarily independent).
+\end{itemize}
+
+\subsection{Correlation}
+
+The \textbf{correlation coefficient} is
+\[
+\rho_{X,Y} = \frac{\operatorname{Cov}(X,Y)}{\sqrt{\operatorname{Var}(X)\operatorname{Var}(Y)}}.
+\]
+It is a dimensionless number in \([-1,1]\) that measures linear association.
+
+\textbf{Example (Asset returns).}  
+Suppose \(R_1, R_2\) are daily returns on two stocks.  
+If \(\rho_{R_1,R_2} \approx 0.9\), they move together strongly.  
+If \(\rho \approx -0.5\), one tends to go up when the other goes down.  
+Correlation \(\rho \approx 0\) means no linear relationship, though non-linear dependencies might still exist.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Law of Large Numbers and Central Limit Theorem}
+
+\subsection{Law of Large Numbers (LLN)}
+
+Let \(X_1, X_2, \dots\) be i.i.d. random variables with \(E[X_i] = \mu\).  
+Define the sample mean
+\[
+\bar{X}_n = \frac{1}{n}\sum_{i=1}^{n} X_i.
+\]
+The \textbf{law of large numbers} states that, as \(n \to \infty\),
+\[
+\bar{X}_n \to \mu \quad \text{(in probability)}.
+\]
+In words, the sample mean converges to the true mean as we get more data.
+
+\textbf{Example.}  
+Repeatedly roll a fair die and record the average of the outcomes.  
+The true mean is
+\[
+\mu = \frac{1+2+3+4+5+6}{6} = 3.5.
+\]
+As you roll more and more times, your running average will get closer and closer to 3.5, with fluctuations shrinking.
+
+\subsection{Central Limit Theorem (CLT)}
+
+Under mild conditions, the \textbf{central limit theorem} says that
+\[
+\frac{\bar{X}_n - \mu}{\sigma / \sqrt{n}} \Rightarrow N(0,1),
+\]
+where \(\sigma^2 = \operatorname{Var}(X_i)\), and \(\Rightarrow\) denotes convergence in distribution.  
+This means that for large \(n\), the standardized sample mean is approximately normal.
+
+\textbf{Intuition.}  
+Regardless of the original distribution of \(X_i\), the sum (or average) of many independent copies looks increasingly like a normal distribution.  
+This underlies many statistical methods and justifies using normal approximations for averages.
+
+\textbf{Example.}  
+Let \(X_i\) be daily returns of a strategy with unknown distribution but finite mean \(\mu\) and variance \(\sigma^2\).  
+Over \(n\) days, the sample mean \(\bar{X}_n\) will be approximately normal:
+\[
+\bar{X}_n \approx N\left(\mu, \frac{\sigma^2}{n}\right).
+\]
+This approximation lets us build confidence intervals and hypothesis tests about \(\mu\).
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{From Probability to Statistics: Sampling and Estimation}
+
+\subsection{Population vs. Sample}
+
+\begin{itemize}
+    \item \textbf{Population}: the entire set of objects/observations of interest (e.g., all daily returns of a stock).
+    \item \textbf{Sample}: a subset of the population we actually observe (e.g., last 100 days).
+\end{itemize}
+
+Statistics uses sample data to infer properties (parameters) of the population, such as the true mean and variance.
+
+\subsection{Point Estimators}
+
+A \textbf{point estimator} is a rule (function of the data) used to estimate a parameter.
+
+\textbf{Examples.}
+\begin{itemize}
+    \item To estimate the population mean \(\mu\), we use the sample mean \(\bar{X}\).
+    \item To estimate the population variance \(\sigma^2\), we use the sample variance \(s^2\).
+\end{itemize}
+
+A good estimator is typically unbiased or has small bias, and small variance.
+
+\subsection{Sampling Distribution}
+
+The \textbf{sampling distribution} of an estimator is the distribution it would have if we repeated the sampling process many times.
+
+\textbf{Example.}  
+Take many independent samples of size \(n\) from a population with mean \(\mu\) and variance \(\sigma^2\), and compute \(\bar{X}\) each time.  
+The distribution of these \(\bar{X}\) values is the sampling distribution of the sample mean.  
+By the CLT, for large \(n\), it is approximately normal with mean \(\mu\) and variance \(\sigma^2/n\).
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Confidence Intervals for a Mean}
+
+\subsection{Known Variance, Normal Model}
+
+Suppose \(X_1,\dots,X_n\) are i.i.d. \(N(\mu,\sigma^2)\) with \(\sigma^2\) known.  
+Then
+\[
+\bar{X} \sim N\left(\mu, \frac{\sigma^2}{n}\right).
+\]
+A \((1-\alpha)\)-level \textbf{confidence interval} for \(\mu\) is
+\[
+\bar{X} \pm z_{\alpha/2} \frac{\sigma}{\sqrt{n}},
+\]
+where \(z_{\alpha/2}\) is the upper \(\alpha/2\) quantile of the standard normal distribution (e.g., \(z_{0.025} \approx 1.96\) for 95\% confidence).
+
+\textbf{Interpretation.}  
+If we repeatedly drew samples and built intervals using this formula, then in the long run, a fraction \(1-\alpha\) of those intervals would contain the true mean \(\mu\).
+
+\textbf{Example.}  
+Assume daily returns \(X_i\) of a strategy are roughly normal with unknown mean \(\mu\) and known \(\sigma = 2\%\).  
+You observe \(n=100\) days and compute \(\bar{X} = 0.3\%\).  
+A 95\% confidence interval for \(\mu\) is
+\[
+0.3\% \pm 1.96 \cdot \frac{2\%}{\sqrt{100}}
+= 0.3\% \pm 1.96 \cdot 0.2\%
+= 0.3\% \pm 0.392\%.
+\]
+So the interval is approximately \([-0.092\%, 0.692\%]\).  
+This says that, given the model assumptions, it is plausible the true mean daily return lies in this range.
+
+\subsection{Unknown Variance, t-Distribution}
+
+If \(\sigma^2\) is unknown, we replace it with the sample standard deviation \(s\).  
+When the data are normal, the statistic
+\[
+T = \frac{\bar{X} - \mu}{s/\sqrt{n}}
+\]
+has a \textbf{Student's t} distribution with \(n-1\) degrees of freedom.
+
+A \((1-\alpha)\)-level confidence interval for \(\mu\) is
+\[
+\bar{X} \pm t_{\alpha/2, n-1} \frac{s}{\sqrt{n}},
+\]
+where \(t_{\alpha/2, n-1}\) is the upper \(\alpha/2\) quantile of the t-distribution with \(n-1\) degrees of freedom.
+
+\textbf{Example.}  
+Suppose you measure the execution time (in milliseconds) of a certain function 20 times and obtain a sample mean \(\bar{X}=105\) and sample standard deviation \(s=10\).  
+To build a 95\% confidence interval for the true mean execution time, use \(n=20\), so \(n-1=19\) degrees of freedom.  
+From t-tables or software, \(t_{0.025,19} \approx 2.093\).  
+Then
+\[
+105 \pm 2.093 \cdot \frac{10}{\sqrt{20}}
+= 105 \pm 2.093 \cdot 2.236
+\approx 105 \pm 4.68.
+\]
+So the 95\% confidence interval is approximately \([100.3, 109.7]\) milliseconds.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Hypothesis Testing}
+
+\subsection{Basic Concepts}
+
+A \textbf{hypothesis test} is a formal procedure for deciding whether data support or contradict a claim about a population parameter.
+
+\begin{itemize}
+    \item \textbf{Null hypothesis} \(H_0\): a baseline claim (e.g., \(\mu = 0\)).
+    \item \textbf{Alternative hypothesis} \(H_1\): what we consider if \(H_0\) seems implausible (e.g., \(\mu > 0\)).
+\end{itemize}
+
+We use a \textbf{test statistic} (a function of the data) and compute a \textbf{p-value}, the probability, under \(H_0\), of seeing a result as extreme or more extreme than the observed one.  
+If the p-value is small (below a chosen significance level \(\alpha\)), we reject \(H_0\).
+
+\subsection{Z-Test for a Mean (Known Variance)}
+
+Assume \(X_1,\dots,X_n\) i.i.d. \(N(\mu,\sigma^2)\) with known \(\sigma^2\).  
+We want to test
+\[
+H_0: \mu = \mu_0 \quad \text{vs.} \quad H_1: \mu \ne \mu_0.
+\]
+The test statistic is
+\[
+Z = \frac{\bar{X} - \mu_0}{\sigma/\sqrt{n}}.
+\]
+Under \(H_0\), \(Z \sim N(0,1)\).  
+For a two-sided test at level \(\alpha\), we reject \(H_0\) if \(|Z| > z_{\alpha/2}\).
+
+\textbf{Example.}  
+Suppose a manufacturing process is supposed to produce parts with average length \(\mu_0 = 10\) mm and known \(\sigma=0.2\) mm.  
+From a sample of \(n=50\) parts, we get \(\bar{X}=10.05\) mm.  
+Compute
+\[
+Z = \frac{10.05 - 10}{0.2/\sqrt{50}}
+= \frac{0.05}{0.0283} \approx 1.77.
+\]
+At 5\% significance, \(z_{0.025}\approx1.96\), and since \(1.77 < 1.96\), we do not reject \(H_0\).  
+So there is not enough evidence to conclude the mean has changed.
+
+\subsection{t-Test for a Mean (Unknown Variance)}
+
+If \(\sigma\) is unknown, we use
+\[
+T = \frac{\bar{X} - \mu_0}{s/\sqrt{n}}
+\]
+and compare it to the t-distribution with \(n-1\) degrees of freedom.
+
+The logic is similar: large magnitude of \(T\) suggests that the sample mean is too far from \(\mu_0\) to be easily explained by random sampling alone.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Simple Linear Regression}
+
+\subsection{Model Setup}
+
+In simple linear regression, we model a response \(Y\) in terms of a predictor \(X\) via
+\[
+Y = \beta_0 + \beta_1 X + \varepsilon,
+\]
+where:
+\begin{itemize}
+    \item \(\beta_0\) is the intercept (value of \(Y\) when \(X=0\)).
+    \item \(\beta_1\) is the slope (change in \(Y\) per unit change in \(X\)).
+    \item \(\varepsilon\) is a random error term with mean 0 and variance \(\sigma^2\).
+\end{itemize}
+
+\subsection{Least Squares Estimation}
+
+Given data \((x_i,y_i)\), \(i=1,\dots,n\), the \emph{least squares} estimators \(\hat{\beta}_0,\hat{\beta}_1\) minimize the sum of squared residuals
+\[
+S(\beta_0,\beta_1) = \sum_{i=1}^{n} (y_i - \beta_0 - \beta_1 x_i)^2.
+\]
+Solving the normal equations yields
+\[
+\hat{\beta}_1 =
+\frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}
+     {\sum_{i=1}^{n} (x_i - \bar{x})^2},
+\qquad
+\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}.
+\]
+
+\textbf{Interpretation.}  
+The slope \(\hat{\beta}_1\) is essentially the sample covariance of \(X\) and \(Y\) divided by the variance of \(X\).  
+It measures the average linear effect of \(X\) on \(Y\).
+
+\textbf{Example (Toy data).}  
+Suppose we have:
+\[
+(x,y) = (1,2), (2,3), (3,5), (4,4).
+\]
+Compute:
+\[
+\bar{x} = \frac{1+2+3+4}{4} = 2.5,\qquad
+\bar{y} = \frac{2+3+5+4}{4} = 3.5.
+\]
+Then
+\[
+\sum (x_i - \bar{x})(y_i - \bar{y})
+= (1-2.5)(2-3.5) + (2-2.5)(3-3.5) + (3-2.5)(5-3.5) + (4-2.5)(4-3.5)
+\]
+\[
+= ( -1.5)(-1.5) + (-0.5)(-0.5) + (0.5)(1.5) + (1.5)(0.5)
+= 2.25 + 0.25 + 0.75 + 0.75 = 4.0.
+\]
+Also
+\[
+\sum (x_i - \bar{x})^2
+= (-1.5)^2 + (-0.5)^2 + (0.5)^2 + (1.5)^2
+= 2.25 + 0.25 + 0.25 + 2.25 = 5.0.
+\]
+So
+\[
+\hat{\beta}_1 = \frac{4.0}{5.0} = 0.8,
+\qquad
+\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}
+= 3.5 - 0.8 \cdot 2.5 = 3.5 - 2.0 = 1.5.
+\]
+The fitted line is
+\[
+\hat{y} = 1.5 + 0.8 x.
+\]
+This line best (in least-squares sense) fits the observed points.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Where to Go Next}
+
+This course has covered the fundamental building blocks of probability (sample spaces, events, random variables, distributions, expectation, LLN, CLT) and basic statistics (estimation, confidence intervals, hypothesis testing, and simple regression) at the level of a standard introductory module.\,[web:13][web:18][web:25]
+
+For further study, natural next steps include:
+\begin{itemize}
+    \item More detailed treatment of maximum likelihood estimation and Bayesian inference.
+    \item Multivariate distributions and multivariate normal models.
+    \item Multiple linear regression and generalized linear models.
+    \item Time series analysis (e.g., ARMA, GARCH) for modeling financial returns.
+\end{itemize}
+
+With the foundations developed here, you are well-equipped to tackle more advanced texts and courses in probability, statistics, and quantitative modeling.
+
+\end{document}
