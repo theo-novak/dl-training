@@ -96,3 +96,10 @@ Thumbs.db
 
 # Project-specific
 *.log
+
+# Stats-notebook build machinery — disposable generators + shared helper from
+# the notebook-generation run. Cloners get the finished notebooks in
+# notebooks/stats/, not the scripts that produced them.
+scripts/_tmp/
+scripts/stats_nb.py
+*.err
